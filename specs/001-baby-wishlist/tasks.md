@@ -8,14 +8,14 @@ commits" en plan.md). Regla general: un commit por tarea.
 
 ## Fase 0 — Scaffolding
 
-- [ ] T001 Estructura backend FastAPI (`main.py`, `app/core/config.py`,
+- [x] T001 Estructura backend FastAPI (`main.py`, `app/core/config.py`,
       `requirements.txt`, `.env.example`) espejando FinTrack
-- [ ] T002 `docker-compose.yml` con Postgres 16 para dev local
-- [ ] T003 Alembic inicializado (`alembic init`, `env.py` leyendo
+- [x] T002 `docker-compose.yml` con Postgres 16 para dev local
+- [x] T003 Alembic inicializado (`alembic init`, `env.py` leyendo
       `DATABASE_URL`)
-- [ ] T004 [P] Estructura frontend Nuxt 3 + TS + Nuxt UI v2 + Pinia
+- [x] T004 [P] Estructura frontend Nuxt 3 + TS + Nuxt UI v2 + Pinia
       (`nuxt.config.ts`, `package.json`, layout base)
-- [ ] T004a [P] Commitlint local: `husky` + `@commitlint/cli` +
+- [x] T004a [P] Commitlint local: `husky` + `@commitlint/cli` +
       `@commitlint/config-conventional` en el `package.json` raíz, hook
       `commit-msg` — desde el primer commit del proyecto
 
