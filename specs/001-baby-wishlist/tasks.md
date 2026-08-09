@@ -39,13 +39,13 @@ Depende de Fase 0 (T001, T003).
 
 Depende de T005.
 
-- [ ] T011 `core/security.py` — hash/verify password (bcrypt==4.2.1
+- [x] T011 `core/security.py` — hash/verify password (bcrypt==4.2.1
       pineado)
-- [ ] T012 `core/security.py` — JWT create/decode con PyJWT[crypto]
-- [ ] T013 `core/deps.py` — dependency de autenticación admin
-- [ ] T014 `POST /auth/login`
-- [ ] T015 `GET /auth/me`
-- [ ] T016 Comando/script de seed para crear la única cuenta admin
+- [x] T012 `core/security.py` — JWT create/decode con PyJWT[crypto]
+- [x] T013 `core/deps.py` — dependency de autenticación admin
+- [x] T014 `POST /auth/login`
+- [x] T015 `GET /auth/me`
+- [x] T016 Comando/script de seed para crear la única cuenta admin
       inicial desde variables de entorno
 
 ## Fase 3 — CRUD Items (admin)
