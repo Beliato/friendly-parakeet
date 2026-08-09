@@ -52,16 +52,16 @@ Depende de T005.
 
 Depende de T006, Fase 2.
 
-- [ ] T017 Schemas Pydantic (`ItemCreate`, `ItemUpdate`, `ItemOut` — sin
+- [x] T017 Schemas Pydantic (`ItemCreate`, `ItemUpdate`, `ItemOut` — sin
       exponer `gifter_name` si `estado == reservado`)
-- [ ] T018 `POST /items`
-- [ ] T019 `GET /items` (listado admin)
-- [ ] T020 `PATCH /items/{id}` (datos generales)
-- [ ] T021 `PATCH /items/{id}/adquirir` — incluye la lógica de revelar
+- [x] T018 `POST /items`
+- [x] T019 `GET /items` (listado admin)
+- [x] T020 `PATCH /items/{id}` (datos generales)
+- [x] T021 `PATCH /items/{id}/adquirir` — incluye la lógica de revelar
       `gifter_name` desde la `Reserva` asociada si el item estaba
       `reservado`; 409 si `origen=nosotros` sobre item `reservado` o si
       ya estaba `adquirido`
-- [ ] T021a `DELETE /items/{id}` — con borrado de fotos en DB y R2; 409
+- [x] T021a `DELETE /items/{id}` — con borrado de fotos en DB y R2; 409
       si el item está `reservado`
 
 ## Fase 4 — Cajas de almacenamiento
