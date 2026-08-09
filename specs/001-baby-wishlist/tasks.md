@@ -110,18 +110,18 @@ Depende de T009, T010, Fase 3.
 
 Depende de Fases 2–6.
 
-- [ ] T034 Setup pytest + fixtures con savepoint rollback (patrón
+- [x] T034 Setup pytest + fixtures con savepoint rollback (patrón
       FinTrack)
-- [ ] T035 [P] Tests auth (login, /me, credenciales inválidas)
-- [ ] T036 [P] Tests items CRUD + flujo `adquirir` con revelación de
+- [x] T035 [P] Tests auth (login, /me, credenciales inválidas)
+- [x] T036 [P] Tests items CRUD + flujo `adquirir` con revelación de
       nombre + 409 de `adquirir`/`eliminar` sobre item `reservado` +
       delete con limpieza de fotos
-- [ ] T037 [P] Tests reservas: reservar, deshacer, liberar por admin sin
+- [x] T037 [P] Tests reservas: reservar, deshacer, liberar por admin sin
       exponer nombre, nombre oculto en todos los endpoints admin
       mientras no esté revelado, doble reserva bloqueada (concurrencia
       contra el índice parcial)
-- [ ] T038 [P] Tests wishlist pública: solo se listan items `necesitado`
-- [ ] T038a [P] Tests `/config`: default "Julia en Camino", update solo
+- [x] T038 [P] Tests wishlist pública: solo se listan items `necesitado`
+- [x] T038a [P] Tests `/config`: default "Julia en Camino", update solo
       admin
 
 ## Fase 8 — Frontend base
