@@ -1,14 +1,12 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
 from app.core.config import settings
-from app.routers import auth, cajas, fotos, items
-
-limiter = Limiter(key_func=get_remote_address)
+from app.core.ratelimit import limiter
+from app.routers import auth, cajas, fotos, items, wishlist
 
 app = FastAPI(
     title="Julia en Camino API",
@@ -55,6 +53,7 @@ app.include_router(items.router)
 app.include_router(cajas.router)
 app.include_router(cajas.items_router)
 app.include_router(fotos.router)
+app.include_router(wishlist.router)
 
 
 @app.get("/health")
