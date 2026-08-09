@@ -6,6 +6,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from app.core.config import settings
+from app.routers import auth
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -47,6 +48,9 @@ async def generic_exception_handler(request: Request, exc: Exception):
         content={"detail": "Error interno del servidor"},
         headers=headers,
     )
+
+
+app.include_router(auth.router)
 
 
 @app.get("/health")
