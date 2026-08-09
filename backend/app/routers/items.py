@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
 
+from app.core import storage_r2
 from app.core.database import get_db
 from app.core.deps import get_current_admin
 from app.models.admin import Admin
@@ -139,7 +140,11 @@ def eliminar_item(
                 "para poder eliminarlo."
             ),
         )
-    # Las fotos en DB caen por cascade; la limpieza de objetos en R2 se
-    # conecta en la fase de storage (T028) vía storage_r2.
+    # Las fotos en DB caen por cascade; los objetos en R2 se borran aquí.
+    if storage_r2.esta_configurado():
+        for foto in item.fotos:
+            key = storage_r2.key_desde_url(foto.url)
+            if key:
+                storage_r2.borrar_objeto(key)
     db.delete(item)
     db.commit()
