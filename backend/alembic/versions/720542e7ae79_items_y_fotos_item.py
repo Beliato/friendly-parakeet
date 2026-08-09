@@ -53,4 +53,8 @@ def downgrade() -> None:
     op.drop_table('fotos_item')
     op.drop_index(op.f('ix_items_estado'), table_name='items')
     op.drop_table('items')
+    # drop_table no elimina los tipos ENUM de Postgres; sin esto, un ciclo
+    # downgrade/upgrade falla con "type already exists".
+    sa.Enum(name='estadoitem').drop(op.get_bind(), checkfirst=True)
+    sa.Enum(name='origenadquisicion').drop(op.get_bind(), checkfirst=True)
     # ### end Alembic commands ###
