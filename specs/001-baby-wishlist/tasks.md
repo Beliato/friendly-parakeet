@@ -68,21 +68,21 @@ Depende de T006, Fase 2.
 
 Depende de T008.
 
-- [ ] T022 [P] `POST /cajas`
-- [ ] T023 [P] `GET /cajas`
-- [ ] T024 `PATCH /items/{id}/caja`
+- [x] T022 [P] `POST /cajas`
+- [x] T023 [P] `GET /cajas`
+- [x] T024 `PATCH /items/{id}/caja`
 
 ## Fase 5 — Fotos + R2
 
 Depende de T007.
 
-- [ ] T025 `core/storage_r2.py` — cliente boto3 S3-compatible + generar
+- [x] T025 `core/storage_r2.py` — cliente boto3 S3-compatible + generar
       URL presignada
-- [ ] T026 `POST /items/{id}/fotos/presign` — restringido a
+- [x] T026 `POST /items/{id}/fotos/presign` — restringido a
       `Content-Type` de imagen (jpeg/png/webp) y máx. 5 MB
-- [ ] T027 `POST /items/{id}/fotos` (confirmar subida; rechaza keys no
+- [x] T027 `POST /items/{id}/fotos` (confirmar subida; rechaza keys no
       emitidas para ese item)
-- [ ] T028 `DELETE /items/{id}/fotos/{foto_id}` — borra también el
+- [x] T028 `DELETE /items/{id}/fotos/{foto_id}` — borra también el
       objeto en R2
 
 ## Fase 6 — Wishlist pública + reservas
