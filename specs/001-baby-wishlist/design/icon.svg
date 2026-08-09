@@ -1,0 +1,27 @@
+<svg width="200" height="200" viewBox="0 0 200 200" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Icono de la app Julia en Camino</title>
+<desc>Insignia circular con degrade rosa y una J trazada a mano, con una pequeña estrella; variante oscura para modo noche.</desc>
+<defs>
+<linearGradient id="bgLight" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#fdcae1"/>
+<stop offset="100%" stop-color="#c594aa"/>
+</linearGradient>
+<linearGradient id="bgDark" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#131313"/>
+<stop offset="100%" stop-color="#050505"/>
+</linearGradient>
+<style>
+.bg{fill:url(#bgLight);}
+.letter{stroke:#ffffff;fill:none;stroke-width:16;stroke-linecap:round;stroke-linejoin:round;}
+.star{fill:#ffffff;}
+@media (prefers-color-scheme: dark){
+.bg{fill:url(#bgDark);}
+.letter{stroke:#fdcae1;}
+.star{fill:#fdcae1;}
+}
+</style>
+</defs>
+<circle class="bg" cx="100" cy="100" r="94"/>
+<path class="letter" d="M114,58 L114,122 Q114,150 86,150 Q72,150 62,140"/>
+<path class="star" d="M64,52 L67,60 L75,63 L67,66 L64,74 L61,66 L53,63 L61,60 Z"/>
+</svg>
