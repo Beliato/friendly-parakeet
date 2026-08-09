@@ -23,15 +23,15 @@ commits" en plan.md). Regla general: un commit por tarea.
 
 Depende de Fase 0 (T001, T003).
 
-- [ ] T005 Modelo `Admin` + migración
-- [ ] T006 Modelo `Item` (enums `estado`, `origen_adquisicion`) +
+- [x] T005 Modelo `Admin` + migración
+- [x] T006 Modelo `Item` (enums `estado`, `origen_adquisicion`) +
       migración
-- [ ] T007 Modelo `FotoItem` (FK a `Item`) + migración
-- [ ] T008 [P] Modelo `CajaAlmacenamiento` + migración
-- [ ] T009 Modelo `Reserva` (FK a `Item`, `token_deshacer` único) +
+- [x] T007 Modelo `FotoItem` (FK a `Item`) + migración
+- [x] T008 [P] Modelo `CajaAlmacenamiento` + migración
+- [x] T009 Modelo `Reserva` (FK a `Item`, `token_deshacer` único) +
       migración con índice único parcial `(item_id) WHERE released_at
       IS NULL`
-- [ ] T010 [P] Modelo `WishlistConfig` (fila única, `share_token`,
+- [x] T010 [P] Modelo `WishlistConfig` (fila única, `share_token`,
       `nombre_app`) + migración que inserta la fila seed ("Julia en
       Camino" + `share_token` generado)
 
