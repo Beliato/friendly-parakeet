@@ -14,7 +14,10 @@ export default defineNuxtConfig({
       meta: [
         { name: 'description', content: 'Julia en Camino — catálogo y wishlist para bebé' },
       ],
-      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/icon.svg' }],
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/icon.svg' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+      ],
     },
   },
 
