@@ -128,15 +128,15 @@ Depende de Fases 2–6.
 
 Depende de T004.
 
-- [ ] T039 Layout + tema Nuxt UI v2 (`app.config.ts` con paleta `pink` /
+- [x] T039 Layout + tema Nuxt UI v2 (`app.config.ts` con paleta `pink` /
       `neutral` definida en plan.md)
-- [ ] T039a [P] Favicon/ícono: copiar
+- [x] T039a [P] Favicon/ícono: copiar
       `specs/001-baby-wishlist/design/icon.svg` a `frontend/public/` +
       generar PNGs derivados (`apple-touch-icon`, etc.)
-- [ ] T039b Store `config` (Pinia) — fetch de `GET /config`
+- [x] T039b Store `config` (Pinia) — fetch de `GET /config`
       (`nombre_app`), usado en el header de todas las páginas
-- [ ] T040 Store `auth` (Pinia) + middleware de rutas protegidas
-- [ ] T041 Página `login.vue` (usa `nombre_app` de T039b en el header)
+- [x] T040 Store `auth` (Pinia) + middleware de rutas protegidas
+- [x] T041 Página `login.vue` (usa `nombre_app` de T039b en el header)
 
 ## Fase 9 — Frontend admin
 
