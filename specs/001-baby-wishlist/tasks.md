@@ -89,21 +89,21 @@ Depende de T007.
 
 Depende de T009, T010, Fase 3.
 
-- [ ] T029 `GET /wishlist/link` (admin: obtiene o genera `share_token`)
-- [ ] T029a `PATCH /config` (admin: actualizar `nombre_app`)
-- [ ] T029b [P] `GET /config` (público: `nombre_app` actual, default
+- [x] T029 `GET /wishlist/link` (admin: obtiene o genera `share_token`)
+- [x] T029a `PATCH /config` (admin: actualizar `nombre_app`)
+- [x] T029b [P] `GET /config` (público: `nombre_app` actual, default
       "Julia en Camino")
-- [ ] T030 `GET /w/{share_token}` (público, solo items `necesitado`;
+- [x] T030 `GET /w/{share_token}` (público, solo items `necesitado`;
       incluye `nombre_app` en la respuesta)
-- [ ] T031 `POST /w/{share_token}/items/{item_id}/reservar` (crea
+- [x] T031 `POST /w/{share_token}/items/{item_id}/reservar` (crea
       `Reserva`, devuelve `token_deshacer` una sola vez; 409 si ya hay
       reserva activa — respaldado por el índice único parcial de T009)
-- [ ] T032 `POST /w/reservas/{token_deshacer}/deshacer` (libera reserva,
+- [x] T032 `POST /w/reservas/{token_deshacer}/deshacer` (libera reserva,
       item vuelve a `necesitado`)
-- [ ] T032a `POST /items/{id}/liberar-reserva` (admin descarta la reserva
+- [x] T032a `POST /items/{id}/liberar-reserva` (admin descarta la reserva
       activa sin que la respuesta exponga `nombre_reservante`)
-- [ ] T033 `GET /reservas/pendientes/count` (contador admin, sin nombres)
-- [ ] T033a Rate limiting con `slowapi` en endpoints `/w/*` (límites del
+- [x] T033 `GET /reservas/pendientes/count` (contador admin, sin nombres)
+- [x] T033a Rate limiting con `slowapi` en endpoints `/w/*` (límites del
       plan.md) + `CORS_ORIGINS` configurado en `main.py`
 
 ## Fase 7 — Tests backend
