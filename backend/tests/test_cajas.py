@@ -23,8 +23,7 @@ def test_cajas_requieren_auth(client, caja, item):
     assert client.get("/cajas").status_code == 403
     assert client.post("/cajas", json={"etiqueta": "X"}).status_code == 403
     assert (
-        client.patch(f"/items/{item.id}/caja", json={"caja_id": 1}).status_code
-        == 403
+        client.patch(f"/items/{item.id}/caja", json={"caja_id": 1}).status_code == 403
     )
 
 
@@ -67,7 +66,5 @@ def test_asignar_caja_inexistente_404(client, auth_headers, item):
 
 
 def test_asignar_caja_item_inexistente_404(client, auth_headers, caja):
-    r = client.patch(
-        "/items/999/caja", json={"caja_id": caja.id}, headers=auth_headers
-    )
+    r = client.patch("/items/999/caja", json={"caja_id": caja.id}, headers=auth_headers)
     assert r.status_code == 404

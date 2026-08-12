@@ -23,9 +23,7 @@ def test_reservar_quita_de_la_lista_publica(client, config, item):
 
 def test_doble_reserva_da_409(client, config, item):
     client.post(f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Ana"})
-    r = client.post(
-        f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Beto"}
-    )
+    r = client.post(f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Beto"})
     assert r.status_code == 409
 
 
@@ -41,13 +39,9 @@ def test_indice_parcial_bloquea_doble_reserva_activa(db, item):
 
 
 def test_reserva_liberada_permite_nueva_reserva(client, config, item):
-    r1 = client.post(
-        f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Ana"}
-    )
+    r1 = client.post(f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Ana"})
     client.post(f"/w/reservas/{r1.json()['token_deshacer']}/deshacer")
-    r2 = client.post(
-        f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Beto"}
-    )
+    r2 = client.post(f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Beto"})
     assert r2.status_code == 201
 
 
@@ -57,16 +51,12 @@ def test_reservar_item_inexistente(client, config):
 
 
 def test_reservar_con_share_token_invalido(client, config, item):
-    r = client.post(
-        f"/w/token-falso/items/{item.id}/reservar", json={"nombre": "Ana"}
-    )
+    r = client.post(f"/w/token-falso/items/{item.id}/reservar", json={"nombre": "Ana"})
     assert r.status_code == 404
 
 
 def test_deshacer_reserva(client, config, item, db):
-    r = client.post(
-        f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Ana"}
-    )
+    r = client.post(f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Ana"})
     undo = r.json()["token_deshacer"]
     assert client.post(f"/w/reservas/{undo}/deshacer").status_code == 200
     db.refresh(item)
@@ -76,9 +66,7 @@ def test_deshacer_reserva(client, config, item, db):
 
 
 def test_deshacer_token_gastado_da_404(client, config, item):
-    r = client.post(
-        f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Ana"}
-    )
+    r = client.post(f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Ana"})
     undo = r.json()["token_deshacer"]
     client.post(f"/w/reservas/{undo}/deshacer")
     assert client.post(f"/w/reservas/{undo}/deshacer").status_code == 404
