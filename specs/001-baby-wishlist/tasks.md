@@ -169,20 +169,20 @@ Depende de T030–T032, T039.
 
 Depende de Fase 7 (tests backend) y Fase 10 (frontend completo).
 
-- [ ] T051 [P] `ruff` config backend (`pyproject.toml`, reglas lint +
+- [x] T051 [P] `ruff` config backend (`pyproject.toml`, reglas lint +
       format)
-- [ ] T052 [P] ESLint config frontend (módulo de Nuxt)
-- [ ] T053 Setup Vitest + `@vue/test-utils` (config, primer test smoke)
-- [ ] T054 [P] Tests frontend: store `auth` (login, logout, persistencia
+- [x] T052 [P] ESLint config frontend (módulo de Nuxt)
+- [x] T053 Setup Vitest + `@vue/test-utils` (config, primer test smoke)
+- [x] T054 [P] Tests frontend: store `auth` (login, logout, persistencia
       de sesión)
-- [ ] T055 [P] Tests frontend: store `items` (altas, cambios de estado)
-- [ ] T056 [P] Tests frontend: flujo de reserva/deshacer en la wishlist
+- [x] T055 [P] Tests frontend: store `items` (altas, cambios de estado)
+- [x] T056 [P] Tests frontend: flujo de reserva/deshacer en la wishlist
       pública (componente)
-- [ ] T057 `ci-backend.yml` — GitHub Actions: `ruff check`, `ruff format
+- [x] T057 `ci-backend.yml` — GitHub Actions: `ruff check`, `ruff format
       --check`, `pytest --cov` con gate de 80%
-- [ ] T058 `ci-frontend.yml` — GitHub Actions: `vue-tsc --noEmit`,
+- [x] T058 `ci-frontend.yml` — GitHub Actions: `vue-tsc --noEmit`,
       `eslint .`, `vitest run --coverage` con gate de 70%
-- [ ] T058a [P] `ci-commits.yml` — GitHub Actions: commitlint sobre los
+- [x] T058a [P] `ci-commits.yml` — GitHub Actions: commitlint sobre los
       mensajes del rango del PR (`--from origin/main --to HEAD`)
 
 ## Fase 12 — Deploy
