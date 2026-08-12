@@ -26,7 +26,9 @@ from app.models.reserva import Reserva
 from app.models.wishlist_config import WishlistConfig
 from main import app
 
-TEST_DB_URL = "postgresql://julia:julia123@localhost:5433/julia_test"
+TEST_DB_URL = os.environ.get(
+    "TEST_DATABASE_URL", "postgresql://julia:julia123@localhost:5433/julia_test"
+)
 
 
 @pytest.fixture(scope="session")

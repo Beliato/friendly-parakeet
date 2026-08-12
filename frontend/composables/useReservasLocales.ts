@@ -33,8 +33,9 @@ export function useReservasLocales() {
   }
 
   function olvidar(itemId: number) {
-    const copia = { ...reservas.value }
-    delete copia[itemId]
+    const copia = Object.fromEntries(
+      Object.entries(reservas.value).filter(([id]) => Number(id) !== itemId),
+    )
     reservas.value = copia
     if (import.meta.client) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(copia))
