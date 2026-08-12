@@ -142,18 +142,18 @@ Depende de T004.
 
 Depende de Fase 3–6 (API lista), T039–T041.
 
-- [ ] T042 Store `items` (Pinia)
-- [ ] T043 Página listado de items (badges de estado + contador de
+- [x] T042 Store `items` (Pinia)
+- [x] T043 Página listado de items (badges de estado + contador de
       reservas pendientes de T033)
-- [ ] T044 Formulario crear/editar item, con upload de foto (flujo
+- [x] T044 Formulario crear/editar item, con upload de foto (flujo
       presign de T026–T027)
-- [ ] T045 Modal "marcar adquirido" (origen + nombre si aplica)
-- [ ] T045a Acciones "eliminar item" y "liberar reserva" con modales de
+- [x] T045 Modal "marcar adquirido" (origen + nombre si aplica)
+- [x] T045a Acciones "eliminar item" y "liberar reserva" con modales de
       confirmación (la de liberar explica que no se notifica al
       reservante y que el nombre no se revela)
-- [ ] T046 Gestión de cajas (crear/asignar, usa T022–T024)
-- [ ] T047 Página "link de wishlist" (mostrar/copiar URL de T029)
-- [ ] T047a Página "configuración" (editar `nombre_app` vía T029a/T039b)
+- [x] T046 Gestión de cajas (crear/asignar, usa T022–T024)
+- [x] T047 Página "link de wishlist" (mostrar/copiar URL de T029)
+- [x] T047a Página "configuración" (editar `nombre_app` vía T029a/T039b)
 
 ## Fase 10 — Frontend wishlist pública
 
