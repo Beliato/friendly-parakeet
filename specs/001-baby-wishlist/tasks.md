@@ -159,11 +159,11 @@ Depende de Fase 3–6 (API lista), T039–T041.
 
 Depende de T030–T032, T039.
 
-- [ ] T048 Página pública `w/[token].vue` (grid de items disponibles,
+- [x] T048 Página pública `w/[token].vue` (grid de items disponibles,
       header con `nombre_app` de T039b)
-- [ ] T049 Flujo de reserva (modal pedir nombre, guardar
+- [x] T049 Flujo de reserva (modal pedir nombre, guardar
       `token_deshacer` en localStorage)
-- [ ] T050 Acción "deshacer mi reserva" (usa `token_deshacer` guardado)
+- [x] T050 Acción "deshacer mi reserva" (usa `token_deshacer` guardado)
 
 ## Fase 11 — Calidad y CI
 
