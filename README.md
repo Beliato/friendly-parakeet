@@ -11,19 +11,22 @@ sorpresa de quién regaló qué** hasta que el regalo llega.
 
 ## Cómo funciona
 
-**Para la pareja (admin):** cargan items con foto y link de tienda, marcan
-lo que ya tienen (comprado o regalado), y le asignan una caja de
-almacenamiento para encontrarlo después.
+**Para la pareja (admin):** cargan items con foto, link de tienda,
+cantidad, categoría, prioridad y rango de precio; marcan lo que ya tienen
+(comprado o regalado) y le asignan una caja de almacenamiento. Un buscador
+responde "¿dónde guardamos el termómetro?" sin acordarse de la caja.
 
 **Para los invitados:** entran con un link, sin crear cuenta, y marcan qué
-van a regalar. El item desaparece de la lista para que nadie lo repita.
+van a regalar, con un mensaje opcional. De los items que se necesitan de a
+varios (bodies, pañales) cada uno aparta una unidad y el resto sigue
+disponible.
 
-**La sorpresa:** cuando alguien reserva un item, su nombre queda guardado
-pero **nadie puede verlo — ni la pareja**. Se revela recién cuando marcan
-el regalo como recibido. Esto no es una regla de UI: el schema de la API
-simplemente no expone ese campo mientras el item está reservado, y hay
-tests que verifican que el nombre no aparece en ningún byte de ninguna
-respuesta de admin.
+**La sorpresa:** cuando alguien reserva, su nombre y su mensaje quedan
+guardados pero **nadie puede verlos — ni la pareja**. Se revelan recién al
+marcar ese regalo como recibido, y de a uno: recibir una unidad no delata
+a quienes reservaron las otras. Esto no es una regla de UI — el schema de
+la API simplemente no expone esos campos, y hay tests que verifican que el
+nombre no aparece en ningún byte de ninguna respuesta de admin.
 
 ## Stack
 
@@ -135,8 +138,11 @@ Root directory `frontend`, framework Nuxt (autodetectado). Configurá
 
 ## Documentación del diseño
 
-El proyecto se construyó con spec-driven development. Los tres documentos
-viven en [`specs/001-baby-wishlist/`](specs/001-baby-wishlist/):
+El proyecto se construyó con spec-driven development, en dos tandas:
+[`001-baby-wishlist/`](specs/001-baby-wishlist/) (la app base) y
+[`002-mejoras/`](specs/002-mejoras/) (cantidad, categorías, prioridad,
+precio, buscador, mensaje y PWA). Cada una tiene los mismos tres
+documentos:
 
 - [`spec.md`](specs/001-baby-wishlist/spec.md) — el qué y el por qué:
   historias de usuario y reglas de negocio.
