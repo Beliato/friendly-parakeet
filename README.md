@@ -11,10 +11,18 @@ sorpresa de quién regaló qué** hasta que el regalo llega.
 
 ## Cómo funciona
 
-**Para la pareja (admin):** cargan items con foto, link de tienda,
-cantidad, categoría, prioridad y rango de precio; marcan lo que ya tienen
-(comprado o regalado) y le asignan una caja de almacenamiento. Un buscador
-responde "¿dónde guardamos el termómetro?" sin acordarse de la caja.
+**Registrar lo que llega:** un botón anota "recibimos X de parte de Y" en
+un solo paso — si el objeto no estaba en el catálogo se crea ahí mismo, y
+el nombre de la persona se autocompleta con los que ya usaron para que no
+queden variantes del mismo nombre. Se le puede sumar una foto de Julia
+usando el regalo, para mandársela después a quien lo dio.
+
+**Agradecer sin olvidarse de nadie:** una vista agrupa todo lo que regaló
+cada persona y marca a quién falta agradecer.
+
+**Encontrar las cosas:** cada objeto lleva su etapa (recién nacido, 0-3
+meses…) y su caja de almacenamiento. El buscador responde "¿dónde
+guardamos el termómetro?" mostrando caja, etapa y quién lo regaló.
 
 **Para los invitados:** entran con un link, sin crear cuenta, y marcan qué
 van a regalar, con un mensaje opcional. De los items que se necesitan de a
