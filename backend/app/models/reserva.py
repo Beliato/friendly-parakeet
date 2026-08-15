@@ -42,4 +42,4 @@ class Reserva(Base):
     )
     released_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    item = relationship("Item")
+    item = relationship("Item", back_populates="reservas")

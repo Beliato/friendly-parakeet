@@ -89,6 +89,9 @@ class ItemOut(BaseModel):
     amazon_link: str | None = None
     cantidad: int
     cantidad_recibida: int
+    # Cuántas unidades hay reservadas ahora. Es solo un número: los nombres
+    # siguen fuera de este schema.
+    reservas_activas: int = 0
     prioridad: Prioridad
     rango_precio: RangoPrecio | None = None
     categoria: CategoriaOut | None = None

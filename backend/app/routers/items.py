@@ -37,6 +37,7 @@ def _cargado(query):
         selectinload(Item.fotos),
         selectinload(Item.caja),
         selectinload(Item.categoria),
+        selectinload(Item.reservas),
     )
 
 

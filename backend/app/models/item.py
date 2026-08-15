@@ -91,6 +91,15 @@ class Item(Base):
         cascade="all, delete-orphan",
         order_by="FotoItem.orden",
     )
+    reservas = relationship(
+        "Reserva", back_populates="item", cascade="all, delete-orphan"
+    )
+
+    @property
+    def reservas_activas(self) -> int:
+        """Cuántas unidades están reservadas. Solo el número: los nombres
+        viven en Reserva y no salen de ahí hasta recibir cada unidad."""
+        return sum(1 for r in self.reservas if r.released_at is None)
 
 
 class FotoItem(Base):
