@@ -18,6 +18,17 @@ class Settings(BaseSettings):
     R2_PUBLIC_URL: str = ""
 
     @model_validator(mode="after")
+    def normalizar_database_url(self) -> "Settings":
+        """Railway y otros proveedores entregan la URL con el esquema
+        `postgres://`, que SQLAlchemy 2.0 ya no reconoce. Normalizarlo acá
+        evita un error críptico en el arranque."""
+        if self.DATABASE_URL.startswith("postgres://"):
+            self.DATABASE_URL = self.DATABASE_URL.replace(
+                "postgres://", "postgresql://", 1
+            )
+        return self
+
+    @model_validator(mode="after")
     def check_production_secrets(self) -> "Settings":
         if not self.DEBUG:
             if self.JWT_SECRET.lower() in _INSECURE_SECRETS:
