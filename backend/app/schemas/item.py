@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 from app.models.item import (
     EstadoItem,
+    Etapa,
     OrigenAdquisicion,
     Prioridad,
     RangoPrecio,
@@ -51,6 +52,7 @@ class ItemCreate(BaseModel):
     prioridad: Prioridad = Prioridad.NORMAL
     rango_precio: RangoPrecio | None = None
     categoria_id: int | None = None
+    etapa: Etapa = Etapa.CUALQUIERA
 
     @field_validator("amazon_link")
     @classmethod
@@ -66,6 +68,7 @@ class ItemUpdate(BaseModel):
     prioridad: Prioridad | None = None
     rango_precio: RangoPrecio | None = None
     categoria_id: int | None = None
+    etapa: Etapa | None = None
 
     @field_validator("amazon_link")
     @classmethod
@@ -79,9 +82,10 @@ class ItemAdquirir(BaseModel):
 
 
 class ItemOut(BaseModel):
-    """Salida admin. gifter_name solo lleva los nombres ya revelados: las
-    reservas activas viven en la tabla reservas y este schema nunca las
-    toca — garantía estructural de la sorpresa."""
+    """Salida admin. `personas` lista solo a quienes ya fueron revelados
+    (vienen de los regalos registrados); las reservas activas viven en la
+    tabla reservas y este schema nunca las toca — garantía estructural de
+    la sorpresa."""
 
     id: int
     nombre: str
@@ -95,9 +99,10 @@ class ItemOut(BaseModel):
     prioridad: Prioridad
     rango_precio: RangoPrecio | None = None
     categoria: CategoriaOut | None = None
+    etapa: Etapa
     estado: EstadoItem
     origen_adquisicion: OrigenAdquisicion | None = None
-    gifter_name: str | None = None
+    personas: list[str] = []
     caja: CajaOut | None = None
     fotos: list[FotoItemOut] = []
     created_at: datetime
@@ -108,10 +113,14 @@ class ItemOut(BaseModel):
 
 
 class ItemBusquedaOut(BaseModel):
+    """Lo que hace falta para responder "¿dónde está y de quién vino?"."""
+
     id: int
     nombre: str
     descripcion: str | None = None
     estado: EstadoItem
+    etapa: Etapa
+    personas: list[str] = []
     caja: CajaOut | None = None
 
     class Config:

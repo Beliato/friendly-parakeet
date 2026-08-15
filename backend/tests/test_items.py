@@ -4,7 +4,7 @@ def test_crear_item_minimo(client, auth_headers):
     body = r.json()
     assert body["nombre"] == "Pañalera"
     assert body["estado"] == "NECESITADO"
-    assert body["gifter_name"] is None
+    assert body["personas"] == []
     assert body["fotos"] == []
 
 
@@ -68,7 +68,7 @@ def test_adquirir_nosotros(client, auth_headers, item):
     body = r.json()
     assert body["estado"] == "ADQUIRIDO"
     assert body["origen_adquisicion"] == "NOSOTROS"
-    assert body["gifter_name"] is None
+    assert body["personas"] == []
 
 
 def test_adquirir_regalo_manual(client, auth_headers, item):
@@ -78,7 +78,7 @@ def test_adquirir_regalo_manual(client, auth_headers, item):
         headers=auth_headers,
     )
     assert r.status_code == 200
-    assert r.json()["gifter_name"] == "Tía Rosa"
+    assert r.json()["personas"] == ["Tía Rosa"]
 
 
 def test_readquirir_da_409(client, auth_headers, item):
@@ -116,19 +116,19 @@ def test_recibir_unidad_revela_nombre_real(client, auth_headers, item_reservado,
     assert r.status_code == 200
     body = r.json()
     assert body["nombre"] == "Abuela Marta"
-    assert body["item"]["gifter_name"] == "Abuela Marta"
+    assert body["item"]["personas"] == ["Abuela Marta"]
     assert body["item"]["estado"] == "ADQUIRIDO"
     db.refresh(reserva)
     assert reserva.revelado is True
     assert reserva.released_at is not None
 
 
-def test_gifter_name_oculto_mientras_reservado(client, auth_headers, item_reservado):
+def test_persona_oculta_mientras_reservado(client, auth_headers, item_reservado):
     item, _ = item_reservado
     r = client.get("/items", headers=auth_headers)
     listado = [x for x in r.json() if x["id"] == item.id][0]
     assert listado["estado"] == "RESERVADO"
-    assert listado["gifter_name"] is None
+    assert listado["personas"] == []
     # El nombre no aparece en ningún byte de la respuesta admin.
     assert "Abuela Marta" not in r.text
 

@@ -10,6 +10,7 @@ from app.core.deps import get_current_admin
 from app.models.admin import Admin
 from app.models.categoria import Categoria
 from app.models.item import EstadoItem, Item, OrigenAdquisicion
+from app.models.regalo import OrigenRegalo, Regalo
 from app.models.reserva import Reserva
 from app.schemas.item import (
     ItemAdquirir,
@@ -22,7 +23,7 @@ from app.schemas.item import (
 )
 from app.services.items import (
     contar_reservas_activas,
-    recalcular_estado,
+    recalcular_item,
     reservas_activas,
 )
 
@@ -129,7 +130,7 @@ def editar_item(
 
     for campo, valor in cambios.items():
         setattr(item, campo, valor)
-    recalcular_estado(db, item)
+    recalcular_item(db, item)
     db.commit()
     db.refresh(item)
     return item
@@ -181,15 +182,20 @@ def recibir_unidad(
 
     reserva.revelado = True
     reserva.released_at = datetime.now(UTC)
-    item.cantidad_recibida += 1
-    item.origen_adquisicion = OrigenAdquisicion.REGALO
-    # gifter_name acumula los nombres ya revelados del item.
-    item.gifter_name = (
-        f"{item.gifter_name}, {reserva.nombre_reservante}"
-        if item.gifter_name
-        else reserva.nombre_reservante
+    # La promesa se convierte en un hecho: la reserva queda cerrada y nace
+    # el regalo, con el nombre y el mensaje que había dejado la persona.
+    db.add(
+        Regalo(
+            item_id=item.id,
+            persona=reserva.nombre_reservante,
+            origen=OrigenRegalo.REGALO,
+            cantidad=1,
+            fecha=datetime.now(UTC).date(),
+            nota=reserva.mensaje,
+            reserva_id=reserva.id,
+        )
     )
-    recalcular_estado(db, item)
+    recalcular_item(db, item)
     db.commit()
     db.refresh(item)
     return ReservaReveladaOut(
@@ -220,7 +226,7 @@ def liberar_unidad(
         raise HTTPException(status_code=404, detail="Reserva activa no encontrada")
 
     reserva.released_at = datetime.now(UTC)
-    recalcular_estado(db, item)
+    recalcular_item(db, item)
     db.commit()
     db.refresh(item)
     return item
@@ -249,12 +255,18 @@ def adquirir_item(
             ),
         )
 
-    item.cantidad_recibida = item.cantidad
-    item.origen_adquisicion = body.origen
-    item.gifter_name = (
-        body.gifter_name if body.origen == OrigenAdquisicion.REGALO else None
+    faltantes = item.cantidad - item.cantidad_recibida
+    es_regalo = body.origen == OrigenAdquisicion.REGALO
+    db.add(
+        Regalo(
+            item_id=item.id,
+            persona=(body.gifter_name or "").strip() if es_regalo else "",
+            origen=OrigenRegalo.REGALO if es_regalo else OrigenRegalo.NOSOTROS,
+            cantidad=faltantes,
+            fecha=datetime.now(UTC).date(),
+        )
     )
-    recalcular_estado(db, item)
+    recalcular_item(db, item)
     db.commit()
     db.refresh(item)
     return item
