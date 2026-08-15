@@ -22,7 +22,9 @@ CONTENT_TYPES_PERMITIDOS = {
 }
 MAX_BYTES = 5 * 1024 * 1024  # 5 MB
 
-_KEY_RE = re.compile(r"^items/(\d+)/[0-9a-f-]{36}\.(jpg|png|webp)$")
+# Dos colecciones: las fotos de referencia del catálogo (items/) y las
+# fotos de Julia usando cada regalo (regalos/).
+_KEY_RE = re.compile(r"^(items|regalos)/(\d+)/[0-9a-f-]{36}\.(jpg|png|webp)$")
 
 
 def esta_configurado() -> bool:
@@ -45,14 +47,15 @@ def _cliente():
     )
 
 
-def generar_key(item_id: int, content_type: str) -> str:
+def generar_key(item_id: int, content_type: str, prefijo: str = "items") -> str:
     ext = CONTENT_TYPES_PERMITIDOS[content_type]
-    return f"items/{item_id}/{uuid.uuid4()}.{ext}"
+    return f"{prefijo}/{item_id}/{uuid.uuid4()}.{ext}"
 
 
-def key_pertenece_a_item(key: str, item_id: int) -> bool:
+def key_pertenece_a_item(key: str, item_id: int, prefijo: str = "items") -> bool:
+    """Valida que la key corresponda a un presign emitido para ese dueño."""
     m = _KEY_RE.match(key)
-    return bool(m) and int(m.group(1)) == item_id
+    return bool(m) and m.group(1) == prefijo and int(m.group(2)) == item_id
 
 
 def presign_put(key: str, content_type: str) -> str:

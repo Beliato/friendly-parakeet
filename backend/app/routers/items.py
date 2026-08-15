@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.core.deps import get_current_admin
 from app.models.admin import Admin
 from app.models.categoria import Categoria
-from app.models.item import EstadoItem, Item, OrigenAdquisicion
+from app.models.item import EstadoItem, Etapa, Item, OrigenAdquisicion
 from app.models.regalo import OrigenRegalo, Regalo
 from app.models.reserva import Reserva
 from app.schemas.item import (
@@ -39,6 +39,7 @@ def _cargado(query):
         selectinload(Item.caja),
         selectinload(Item.categoria),
         selectinload(Item.reservas),
+        selectinload(Item.regalos),
     )
 
 
@@ -72,36 +73,48 @@ def crear_item(
 
 @router.get("", response_model=list[ItemOut])
 def listar_items(
+    etapa: Etapa | None = None,
+    estado: EstadoItem | None = None,
     db: Session = Depends(get_db),
     _: Admin = Depends(get_current_admin),
 ):
-    return _cargado(db.query(Item)).order_by(Item.created_at.desc()).all()
+    query = _cargado(db.query(Item))
+    if etapa is not None:
+        query = query.filter(Item.etapa == etapa)
+    if estado is not None:
+        query = query.filter(Item.estado == estado)
+    return query.order_by(Item.created_at.desc()).all()
 
 
 @router.get("/buscar", response_model=list[ItemBusquedaOut])
 def buscar_items(
     q: str = Query(min_length=1, max_length=100),
+    etapa: Etapa | None = None,
     db: Session = Depends(get_db),
     _: Admin = Depends(get_current_admin),
 ):
-    """Busca por nombre y descripción, ignorando mayúsculas y acentos."""
+    """Busca por nombre y descripción, ignorando mayúsculas y acentos.
+
+    Devuelve lo necesario para responder de una: dónde está guardado, para
+    qué etapa sirve y quién lo regaló.
+    """
     normalizado = q.strip().translate(str.maketrans(_ACENTOS_DESDE, _ACENTOS_HASTA))
     patron = f"%{normalizado.lower()}%"
 
     def sin_acentos(col):
         return func.translate(func.lower(col), _ACENTOS_DESDE, _ACENTOS_HASTA)
 
-    return (
+    query = (
         db.query(Item)
-        .options(selectinload(Item.caja))
+        .options(selectinload(Item.caja), selectinload(Item.regalos))
         .filter(
             sin_acentos(Item.nombre).like(patron)
             | sin_acentos(func.coalesce(Item.descripcion, "")).like(patron)
         )
-        .order_by(Item.nombre)
-        .limit(50)
-        .all()
     )
+    if etapa is not None:
+        query = query.filter(Item.etapa == etapa)
+    return query.order_by(Item.nombre).limit(50).all()
 
 
 @router.patch("/{item_id}", response_model=ItemOut)
