@@ -144,7 +144,7 @@ async function deshacer(itemId: number) {
         v-if="logoOk"
         :src="LOGO"
         alt=""
-        class="mx-auto w-full max-w-md"
+        class="mx-auto h-40 w-40 sm:h-52 sm:w-52"
         aria-hidden="true"
         @error="logoOk = false"
       >
