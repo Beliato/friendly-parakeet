@@ -4,10 +4,11 @@
   <p>Catálogo y wishlist para la llegada de un bebé.</p>
 </div>
 
-Una app para que una pareja lleve el catálogo de todo lo que necesita,
-sepa qué ya tiene y en qué caja lo guardó, y comparta una wishlist con
-familiares y amigos para evitar regalos duplicados — **preservando la
-sorpresa de quién regaló qué** hasta que el regalo llega.
+Una app para llevar el registro de **qué recibieron, de parte de quién y
+dónde quedó guardado** durante todo el proceso de la llegada de un bebé.
+Incluye una wishlist compartible para coordinar con la familia y evitar
+regalos duplicados, preservando la sorpresa de quién regaló qué hasta que
+el regalo llega.
 
 ## Cómo funciona
 
@@ -146,11 +147,17 @@ Root directory `frontend`, framework Nuxt (autodetectado). Configurá
 
 ## Documentación del diseño
 
-El proyecto se construyó con spec-driven development, en dos tandas:
-[`001-baby-wishlist/`](specs/001-baby-wishlist/) (la app base) y
-[`002-mejoras/`](specs/002-mejoras/) (cantidad, categorías, prioridad,
-precio, buscador, mensaje y PWA). Cada una tiene los mismos tres
-documentos:
+El proyecto se construyó con spec-driven development, en tandas:
+
+- [`001-baby-wishlist/`](specs/001-baby-wishlist/) — la app base.
+- [`002-mejoras/`](specs/002-mejoras/) — cantidad, categorías, prioridad,
+  precio, buscador, mensaje y PWA.
+- [`003-registro-regalos/`](specs/003-registro-regalos/) — el registro de
+  regalos, agradecimientos, etapas y las fotos de Julia.
+- [`004-pagina-publica/`](specs/004-pagina-publica/) — la página de
+  celebración. **Pendiente**, solo las decisiones tomadas.
+
+Cada tanda tiene los mismos tres documentos:
 
 - [`spec.md`](specs/001-baby-wishlist/spec.md) — el qué y el por qué:
   historias de usuario y reglas de negocio.
