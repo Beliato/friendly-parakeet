@@ -23,6 +23,7 @@ const enviando = ref(false)
 // Se ata en runtime y no como src estático: si el archivo todavía no está
 // en public/, Vite fallaría al resolver el import en build.
 const LOGO = '/logo-julia.png'
+const LOGO_DARK = '/logo-julia-dark.png'
 const logoOk = ref(true)
 
 // Items reservados desde este navegador ya no vienen en la lista pública,
@@ -138,16 +139,19 @@ async function deshacer(itemId: number) {
 <template>
   <div class="min-h-screen bg-neutral-50 dark:bg-neutral-950">
     <header class="px-4 pb-8 pt-10 text-center sm:pt-16">
-      <!-- El logo con la guirnalda es la pieza principal; si todavía no
-           está en public/, cae al ícono simple sin romper nada. -->
-      <img
-        v-if="logoOk"
-        :src="LOGO"
-        alt=""
-        class="mx-auto h-40 w-40 sm:h-52 sm:w-52"
-        aria-hidden="true"
-        @error="logoOk = false"
-      >
+      <!-- El logo con la guirnalda es la pieza principal. <picture> elige
+           la variante clara u oscura sin JavaScript, así no parpadea al
+           cargar. Si el archivo todavía no está, cae al ícono simple. -->
+      <picture v-if="logoOk">
+        <source :srcset="LOGO_DARK" media="(prefers-color-scheme: dark)">
+        <img
+          :src="LOGO"
+          alt=""
+          class="mx-auto h-40 w-40 sm:h-52 sm:w-52"
+          aria-hidden="true"
+          @error="logoOk = false"
+        >
+      </picture>
       <img
         v-else
         src="/icon.svg"
