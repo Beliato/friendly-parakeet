@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.exc import IntegrityError
@@ -77,9 +77,7 @@ def contar_reservas_pendientes(
     db: Session = Depends(get_db),
     _: Admin = Depends(get_current_admin),
 ):
-    pendientes = (
-        db.query(Reserva).filter(Reserva.released_at.is_(None)).count()
-    )
+    pendientes = db.query(Reserva).filter(Reserva.released_at.is_(None)).count()
     return ReservasCountOut(pendientes=pendientes)
 
 
@@ -111,7 +109,7 @@ def liberar_reserva(
         )
     # La reserva se descarta sin marcarse como revelada: el nombre del
     # reservante nunca sale de la tabla reservas.
-    reserva.released_at = datetime.now(timezone.utc)
+    reserva.released_at = datetime.now(UTC)
     item.estado = EstadoItem.NECESITADO
     db.commit()
     db.refresh(item)
@@ -134,9 +132,7 @@ def _get_config_por_token(share_token: str, db: Session) -> WishlistConfig:
 
 @router.get("/w/{share_token}", response_model=WishlistPublicaOut)
 @limiter.limit("30/minute")
-def ver_wishlist(
-    request: Request, share_token: str, db: Session = Depends(get_db)
-):
+def ver_wishlist(request: Request, share_token: str, db: Session = Depends(get_db)):
     config = _get_config_por_token(share_token, db)
     items = (
         db.query(Item)
@@ -169,20 +165,18 @@ def reservar_item(
     if not item:
         raise HTTPException(status_code=404, detail="Item no encontrado")
     if item.estado != EstadoItem.NECESITADO:
-        raise HTTPException(
-            status_code=409, detail="El item ya no está disponible"
-        )
+        raise HTTPException(status_code=409, detail="El item ya no está disponible")
     reserva = Reserva(item_id=item_id, nombre_reservante=body.nombre.strip())
     item.estado = EstadoItem.RESERVADO
     db.add(reserva)
     try:
         db.commit()
-    except IntegrityError:
+    except IntegrityError as e:
         # Índice único parcial: otro invitado reservó en simultáneo.
         db.rollback()
         raise HTTPException(
             status_code=409, detail="El item ya no está disponible"
-        )
+        ) from e
     return ReservarResponse(token_deshacer=reserva.token_deshacer)
 
 
@@ -202,7 +196,7 @@ def deshacer_reserva(
     if not reserva:
         raise HTTPException(status_code=404, detail="Reserva no encontrada")
     item = db.query(Item).filter(Item.id == reserva.item_id).first()
-    reserva.released_at = datetime.now(timezone.utc)
+    reserva.released_at = datetime.now(UTC)
     if item and item.estado == EstadoItem.RESERVADO:
         item.estado = EstadoItem.NECESITADO
     db.commit()

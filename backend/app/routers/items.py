@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
@@ -111,7 +111,7 @@ def adquirir_item(
             )
         item.gifter_name = reserva.nombre_reservante
         reserva.revelado = True
-        reserva.released_at = datetime.now(timezone.utc)
+        reserva.released_at = datetime.now(UTC)
     else:
         # NECESITADO: carga manual, sin sorpresa que preservar.
         item.gifter_name = (

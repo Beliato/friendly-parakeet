@@ -1,7 +1,15 @@
+<script setup lang="ts">
+const auth = useAuthStore()
+const router = useRouter()
+
+onMounted(() => {
+  auth.init()
+  router.replace(auth.autenticado ? '/admin' : '/login')
+})
+</script>
+
 <template>
-  <main class="flex min-h-screen items-center justify-center p-4">
-    <h1 class="text-2xl font-medium text-pink-700 dark:text-pink-200">
-      Julia en Camino
-    </h1>
-  </main>
+  <div class="flex items-center justify-center py-20">
+    <UIcon name="i-heroicons-heart" class="h-8 w-8 animate-pulse text-pink-400" />
+  </div>
 </template>

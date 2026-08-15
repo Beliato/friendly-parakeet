@@ -128,61 +128,61 @@ Depende de Fases 2–6.
 
 Depende de T004.
 
-- [ ] T039 Layout + tema Nuxt UI v2 (`app.config.ts` con paleta `pink` /
+- [x] T039 Layout + tema Nuxt UI v2 (`app.config.ts` con paleta `pink` /
       `neutral` definida en plan.md)
-- [ ] T039a [P] Favicon/ícono: copiar
+- [x] T039a [P] Favicon/ícono: copiar
       `specs/001-baby-wishlist/design/icon.svg` a `frontend/public/` +
       generar PNGs derivados (`apple-touch-icon`, etc.)
-- [ ] T039b Store `config` (Pinia) — fetch de `GET /config`
+- [x] T039b Store `config` (Pinia) — fetch de `GET /config`
       (`nombre_app`), usado en el header de todas las páginas
-- [ ] T040 Store `auth` (Pinia) + middleware de rutas protegidas
-- [ ] T041 Página `login.vue` (usa `nombre_app` de T039b en el header)
+- [x] T040 Store `auth` (Pinia) + middleware de rutas protegidas
+- [x] T041 Página `login.vue` (usa `nombre_app` de T039b en el header)
 
 ## Fase 9 — Frontend admin
 
 Depende de Fase 3–6 (API lista), T039–T041.
 
-- [ ] T042 Store `items` (Pinia)
-- [ ] T043 Página listado de items (badges de estado + contador de
+- [x] T042 Store `items` (Pinia)
+- [x] T043 Página listado de items (badges de estado + contador de
       reservas pendientes de T033)
-- [ ] T044 Formulario crear/editar item, con upload de foto (flujo
+- [x] T044 Formulario crear/editar item, con upload de foto (flujo
       presign de T026–T027)
-- [ ] T045 Modal "marcar adquirido" (origen + nombre si aplica)
-- [ ] T045a Acciones "eliminar item" y "liberar reserva" con modales de
+- [x] T045 Modal "marcar adquirido" (origen + nombre si aplica)
+- [x] T045a Acciones "eliminar item" y "liberar reserva" con modales de
       confirmación (la de liberar explica que no se notifica al
       reservante y que el nombre no se revela)
-- [ ] T046 Gestión de cajas (crear/asignar, usa T022–T024)
-- [ ] T047 Página "link de wishlist" (mostrar/copiar URL de T029)
-- [ ] T047a Página "configuración" (editar `nombre_app` vía T029a/T039b)
+- [x] T046 Gestión de cajas (crear/asignar, usa T022–T024)
+- [x] T047 Página "link de wishlist" (mostrar/copiar URL de T029)
+- [x] T047a Página "configuración" (editar `nombre_app` vía T029a/T039b)
 
 ## Fase 10 — Frontend wishlist pública
 
 Depende de T030–T032, T039.
 
-- [ ] T048 Página pública `w/[token].vue` (grid de items disponibles,
+- [x] T048 Página pública `w/[token].vue` (grid de items disponibles,
       header con `nombre_app` de T039b)
-- [ ] T049 Flujo de reserva (modal pedir nombre, guardar
+- [x] T049 Flujo de reserva (modal pedir nombre, guardar
       `token_deshacer` en localStorage)
-- [ ] T050 Acción "deshacer mi reserva" (usa `token_deshacer` guardado)
+- [x] T050 Acción "deshacer mi reserva" (usa `token_deshacer` guardado)
 
 ## Fase 11 — Calidad y CI
 
 Depende de Fase 7 (tests backend) y Fase 10 (frontend completo).
 
-- [ ] T051 [P] `ruff` config backend (`pyproject.toml`, reglas lint +
+- [x] T051 [P] `ruff` config backend (`pyproject.toml`, reglas lint +
       format)
-- [ ] T052 [P] ESLint config frontend (módulo de Nuxt)
-- [ ] T053 Setup Vitest + `@vue/test-utils` (config, primer test smoke)
-- [ ] T054 [P] Tests frontend: store `auth` (login, logout, persistencia
+- [x] T052 [P] ESLint config frontend (módulo de Nuxt)
+- [x] T053 Setup Vitest + `@vue/test-utils` (config, primer test smoke)
+- [x] T054 [P] Tests frontend: store `auth` (login, logout, persistencia
       de sesión)
-- [ ] T055 [P] Tests frontend: store `items` (altas, cambios de estado)
-- [ ] T056 [P] Tests frontend: flujo de reserva/deshacer en la wishlist
+- [x] T055 [P] Tests frontend: store `items` (altas, cambios de estado)
+- [x] T056 [P] Tests frontend: flujo de reserva/deshacer en la wishlist
       pública (componente)
-- [ ] T057 `ci-backend.yml` — GitHub Actions: `ruff check`, `ruff format
+- [x] T057 `ci-backend.yml` — GitHub Actions: `ruff check`, `ruff format
       --check`, `pytest --cov` con gate de 80%
-- [ ] T058 `ci-frontend.yml` — GitHub Actions: `vue-tsc --noEmit`,
+- [x] T058 `ci-frontend.yml` — GitHub Actions: `vue-tsc --noEmit`,
       `eslint .`, `vitest run --coverage` con gate de 70%
-- [ ] T058a [P] `ci-commits.yml` — GitHub Actions: commitlint sobre los
+- [x] T058a [P] `ci-commits.yml` — GitHub Actions: commitlint sobre los
       mensajes del rango del PR (`--from origin/main --to HEAD`)
 
 ## Fase 12 — Deploy
@@ -197,5 +197,5 @@ Depende de todas las anteriores funcionando localmente.
 
 ## Fase 13 — Polish
 
-- [ ] T062 [P] Revisión responsive/mobile-first en todas las páginas
-- [ ] T063 [P] README con instrucciones de setup local y deploy
+- [x] T062 [P] Revisión responsive/mobile-first en todas las páginas
+- [x] T063 [P] README con instrucciones de setup local y deploy

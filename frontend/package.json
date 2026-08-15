@@ -22,9 +22,12 @@
     "vue-router": "^5.0.6"
   },
   "devDependencies": {
+    "@nuxt/eslint": "^1.17.0",
     "@nuxt/test-utils": "^4.0.3",
     "@types/node": "^25.8.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "@vue/test-utils": "^2.4.10",
+    "eslint": "^10.8.1",
     "happy-dom": "^20.9.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.7",

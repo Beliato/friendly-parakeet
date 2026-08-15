@@ -3,7 +3,7 @@
   "private": true,
   "description": "Julia en Camino — catálogo y wishlist para bebé",
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",

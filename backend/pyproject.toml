@@ -1,0 +1,26 @@
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+exclude = ["alembic/versions", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4"]
+ignore = [
+    "E501",
+    # Depends()/Query() en argumentos por defecto es el idiom de FastAPI.
+    "B008",
+    # str + Enum se mantiene por consistencia con FinTrack (no StrEnum).
+    "UP042",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Los imports de modelos en env.py y conftest.py van después de manipular
+# sys.path, y algunos existen solo para registrarse en el metadata.
+"alembic/env.py" = ["E402", "F401"]
+"tests/conftest.py" = ["E402", "F401"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+omit = ["tests/*", "alembic/*", "seed_admin.py"]

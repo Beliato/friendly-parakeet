@@ -1,6 +1,3 @@
-from app.models.item import EstadoItem
-
-
 def test_crear_item_minimo(client, auth_headers):
     r = client.post("/items", json={"nombre": "Pañalera"}, headers=auth_headers)
     assert r.status_code == 201
@@ -98,9 +95,7 @@ def test_readquirir_da_409(client, auth_headers, item):
     assert r.status_code == 409
 
 
-def test_adquirir_nosotros_sobre_reservado_da_409(
-    client, auth_headers, item_reservado
-):
+def test_adquirir_nosotros_sobre_reservado_da_409(client, auth_headers, item_reservado):
     item, _ = item_reservado
     r = client.patch(
         f"/items/{item.id}/adquirir",
@@ -127,9 +122,7 @@ def test_adquirir_regalo_sobre_reservado_revela_nombre_real(
     assert reserva.released_at is not None
 
 
-def test_gifter_name_oculto_mientras_reservado(
-    client, auth_headers, item_reservado
-):
+def test_gifter_name_oculto_mientras_reservado(client, auth_headers, item_reservado):
     item, _ = item_reservado
     r = client.get("/items", headers=auth_headers)
     listado = [x for x in r.json() if x["id"] == item.id][0]
@@ -140,9 +133,7 @@ def test_gifter_name_oculto_mientras_reservado(
 
 
 def test_eliminar_item(client, auth_headers, item):
-    assert (
-        client.delete(f"/items/{item.id}", headers=auth_headers).status_code == 204
-    )
+    assert client.delete(f"/items/{item.id}", headers=auth_headers).status_code == 204
     assert client.get("/items", headers=auth_headers).json() == []
 
 
