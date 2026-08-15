@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import type { Item, ItemBusqueda } from '~/types/api'
-import { PRIORIDAD_LABEL, RANGO_PRECIO_LABEL } from '~/types/api'
+import type { Etapa, Item, ItemBusqueda } from '~/types/api'
+import {
+  ETAPAS,
+  ETAPA_LABEL,
+  PRIORIDAD_LABEL,
+  RANGO_PRECIO_LABEL,
+} from '~/types/api'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -16,6 +21,8 @@ const itemReservas = ref<Item | null>(null)
 const itemCaja = ref<Item | null>(null)
 const itemEliminar = ref<Item | null>(null)
 const filtro = ref<'TODOS' | 'NECESITADO' | 'RESERVADO' | 'ADQUIRIDO'>('TODOS')
+const filtroEtapa = ref<Etapa | 'TODAS'>('TODAS')
+const modalRegistrar = ref(false)
 
 const busqueda = ref('')
 const resultados = ref<ItemBusqueda[] | null>(null)
@@ -44,9 +51,11 @@ watchDebounced(
 )
 
 const itemsFiltrados = computed(() =>
-  filtro.value === 'TODOS'
-    ? items.items
-    : items.items.filter((i) => i.estado === filtro.value),
+  items.items.filter(
+    (i) =>
+      (filtro.value === 'TODOS' || i.estado === filtro.value) &&
+      (filtroEtapa.value === 'TODAS' || i.etapa === filtroEtapa.value),
+  ),
 )
 
 const badge = {
@@ -139,9 +148,23 @@ function salir() {
         </UBadge>
       </div>
       <div class="flex items-center gap-2">
-        <UButton icon="i-heroicons-plus" @click="itemEditando = null; modalForm = true">
+        <UButton icon="i-heroicons-gift" @click="modalRegistrar = true">
+          Registrar regalo
+        </UButton>
+        <UButton
+          variant="outline"
+          icon="i-heroicons-plus"
+          @click="itemEditando = null; modalForm = true"
+        >
           Nuevo item
         </UButton>
+        <UButton
+          variant="ghost"
+          color="gray"
+          icon="i-heroicons-heart"
+          to="/admin/regalos"
+          aria-label="Ver regalos recibidos"
+        />
         <UButton
           variant="ghost"
           color="gray"
@@ -183,6 +206,16 @@ function salir() {
           class="flex flex-wrap items-center justify-between gap-2 py-2"
         >
           <span class="text-sm font-medium">{{ r.nombre }}</span>
+          <UBadge color="gray" variant="subtle">
+            {{ ETAPA_LABEL[r.etapa] }}
+          </UBadge>
+          <UBadge
+            v-if="r.personas.length > 0"
+            color="pink"
+            variant="subtle"
+          >
+            🎁 {{ r.personas.join(', ') }}
+          </UBadge>
           <UBadge v-if="r.caja" color="gray" variant="subtle">
             📦 {{ r.caja.etiqueta }}
             <span v-if="r.caja.descripcion" class="ml-1 opacity-75">
@@ -206,6 +239,16 @@ function salir() {
       >
         {{ f === 'TODOS' ? 'Todos' : badge[f].label }}
       </UButton>
+      <USelect
+        v-model="filtroEtapa"
+        size="xs"
+        class="ml-auto w-44"
+        aria-label="Filtrar por etapa"
+        :options="[
+          { value: 'TODAS', label: 'Todas las etapas' },
+          ...ETAPAS.map((e) => ({ value: e, label: ETAPA_LABEL[e] })),
+        ]"
+      />
     </div>
 
     <div v-if="items.cargando" class="py-10 text-center">
@@ -263,8 +306,11 @@ function salir() {
           <UBadge v-if="item.categoria" color="gray" variant="subtle">
             {{ item.categoria.nombre }}
           </UBadge>
-          <UBadge v-if="item.gifter_name" color="pink" variant="subtle">
-            🎁 {{ item.gifter_name }}
+          <UBadge v-if="item.etapa !== 'CUALQUIERA'" color="gray" variant="subtle">
+            {{ ETAPA_LABEL[item.etapa] }}
+          </UBadge>
+          <UBadge v-if="item.personas.length > 0" color="pink" variant="subtle">
+            🎁 {{ item.personas.join(', ') }}
           </UBadge>
           <UBadge v-if="item.caja" color="gray" variant="subtle">
             📦 {{ item.caja.etiqueta }}
@@ -281,6 +327,11 @@ function salir() {
       </UCard>
     </div>
 
+    <RegistrarRegaloModal
+      v-if="modalRegistrar"
+      @close="modalRegistrar = false"
+      @done="items.fetchAll()"
+    />
     <ItemFormModal v-if="modalForm" :item="itemEditando" @close="modalForm = false" />
     <AdquirirModal
       v-if="itemAdquirir"

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Item, Prioridad, RangoPrecio } from '~/types/api'
+import type { Etapa, Item, Prioridad, RangoPrecio } from '~/types/api'
+import { ETAPAS, ETAPA_LABEL } from '~/types/api'
 
 const props = defineProps<{ item?: Item | null }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
@@ -17,6 +18,7 @@ const cantidad = ref(props.item?.cantidad ?? 1)
 const prioridad = ref<Prioridad>(props.item?.prioridad ?? 'NORMAL')
 const rangoPrecio = ref<RangoPrecio | ''>(props.item?.rango_precio ?? '')
 const categoriaId = ref<number>(props.item?.categoria?.id ?? SIN_CATEGORIA)
+const etapa = ref<Etapa>(props.item?.etapa ?? 'CUALQUIERA')
 const nuevaCategoria = ref('')
 const creandoCategoria = ref(false)
 const guardando = ref(false)
@@ -49,6 +51,7 @@ async function guardar() {
       prioridad: prioridad.value,
       rango_precio: rangoPrecio.value || null,
       categoria_id: catId,
+      etapa: etapa.value,
     }
     if (props.item) {
       await items.editar(props.item.id, body)
@@ -137,6 +140,13 @@ async function quitarFoto(fotoId: number) {
             />
           </UFormGroup>
         </div>
+
+        <UFormGroup label="¿Para qué etapa es?">
+          <USelect
+            v-model="etapa"
+            :options="ETAPAS.map((e) => ({ value: e, label: ETAPA_LABEL[e] }))"
+          />
+        </UFormGroup>
 
         <UFormGroup label="Prioridad">
           <USelect

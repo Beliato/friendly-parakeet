@@ -22,7 +22,8 @@ function item(over: Partial<Item> = {}): Item {
     categoria: null,
     estado: 'NECESITADO',
     origen_adquisicion: null,
-    gifter_name: null,
+    personas: [],
+    etapa: 'CUALQUIERA',
     caja: null,
     fotos: [],
     created_at: '2026-01-01T00:00:00Z',
@@ -71,7 +72,7 @@ describe('store items', () => {
           id: 1,
           estado: 'ADQUIRIDO',
           origen_adquisicion: 'REGALO',
-          gifter_name: 'Abuela Marta',
+          personas: ['Abuela Marta'],
         }),
       )
       .mockResolvedValueOnce({ pendientes: 0 })
@@ -79,7 +80,7 @@ describe('store items', () => {
     await store.adquirir(1, 'REGALO')
 
     expect(store.items[0]!.estado).toBe('ADQUIRIDO')
-    expect(store.items[0]!.gifter_name).toBe('Abuela Marta')
+    expect(store.items[0]!.personas).toEqual(['Abuela Marta'])
     expect(store.pendientes).toBe(0)
   })
 
@@ -97,7 +98,7 @@ describe('store items', () => {
       expect.objectContaining({ method: 'POST' }),
     )
     expect(store.items[0]!.estado).toBe('NECESITADO')
-    expect(store.items[0]!.gifter_name).toBeNull()
+    expect(store.items[0]!.personas).toEqual([])
   })
 
   it('fetchReservas trae las reservas sin nombres', async () => {
@@ -122,7 +123,7 @@ describe('store items', () => {
           cantidad: 2,
           cantidad_recibida: 1,
           estado: 'NECESITADO',
-          gifter_name: 'Prima Sofía',
+          personas: ['Prima Sofía'],
         }),
       })
       .mockResolvedValueOnce({ pendientes: 0 })
