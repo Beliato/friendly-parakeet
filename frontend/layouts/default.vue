@@ -4,13 +4,13 @@ onMounted(() => config.fetch())
 </script>
 
 <template>
-  <div class="min-h-screen bg-pink-100 dark:bg-neutral-950">
+  <div class="min-h-screen bg-neutral-50 dark:bg-neutral-950">
     <header
-      class="border-b border-pink-200 bg-pink-50/80 backdrop-blur dark:border-neutral-900 dark:bg-neutral-950/80"
+      class="border-b border-neutral-200 bg-neutral-100/80 backdrop-blur dark:border-neutral-900 dark:bg-neutral-950/80"
     >
       <div class="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
         <img src="/icon.svg" alt="" class="h-9 w-9" aria-hidden="true">
-        <h1 class="text-lg font-medium text-pink-700 dark:text-pink-200">
+        <h1 class="text-lg font-medium text-pink-800 dark:text-pink-200">
           {{ config.nombreApp }}
         </h1>
         <slot name="header-extra" />

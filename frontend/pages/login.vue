@@ -30,7 +30,7 @@ async function entrar() {
   <div class="mx-auto mt-10 max-w-sm sm:mt-20">
     <UCard>
       <template #header>
-        <h2 class="text-center text-xl font-medium text-pink-700 dark:text-pink-200">
+        <h2 class="text-center text-xl font-medium text-pink-800 dark:text-pink-200">
           Iniciar sesión
         </h2>
       </template>

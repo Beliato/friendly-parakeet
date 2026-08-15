@@ -11,8 +11,15 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@vueuse/nuxt',
     '@nuxt/eslint',
+    '@nuxtjs/google-fonts',
     ...(enTests ? [] : ['@vite-pwa/nuxt']),
   ],
+
+  googleFonts: {
+    families: { 'Libre Caslon Text': [400, 700] },
+    display: 'swap',
+    download: true,
+  },
 
   pwa: {
     registerType: 'autoUpdate',
@@ -20,8 +27,8 @@ export default defineNuxtConfig({
       name: 'Julia en Camino',
       short_name: 'Julia',
       description: 'Catálogo y wishlist para la llegada de Julia',
-      theme_color: '#c594aa',
-      background_color: '#ffe5f0',
+      theme_color: '#8c4c4d',
+      background_color: '#fdf9f0',
       display: 'standalone',
       start_url: '/',
       lang: 'es',

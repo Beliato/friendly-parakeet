@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ItemPublico, WishlistPublica } from '~/types/api'
+import type { ItemPublico, RegaloPublico, WishlistPublica } from '~/types/api'
 import { RANGO_PRECIO_LABEL } from '~/types/api'
 
 definePageMeta({ layout: false })
@@ -12,6 +12,7 @@ const { reservas, cargar, guardar, olvidar } = useReservasLocales()
 const token = computed(() => String(route.params.token))
 const nombreApp = ref('Julia en Camino')
 const items = ref<ItemPublico[]>([])
+const recibidos = ref<RegaloPublico[]>([])
 const cargando = ref(true)
 const error = ref(false)
 
@@ -19,6 +20,11 @@ const itemReservando = ref<ItemPublico | null>(null)
 const nombreInvitado = ref('')
 const mensajeInvitado = ref('')
 const enviando = ref(false)
+// Se ata en runtime y no como src estático: si el archivo todavía no está
+// en public/, Vite fallaría al resolver el import en build.
+const LOGO = '/logo-julia.png'
+const LOGO_DARK = '/logo-julia-dark.png'
+const logoOk = ref(true)
 
 // Items reservados desde este navegador ya no vienen en la lista pública,
 // así que se muestran aparte para poder deshacerlos.
@@ -48,6 +54,7 @@ async function fetchWishlist() {
     })
     nombreApp.value = data.nombre_app
     items.value = data.items
+    recibidos.value = data.recibidos ?? []
     error.value = false
   } catch {
     error.value = true
@@ -130,21 +137,39 @@ async function deshacer(itemId: number) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-pink-100 dark:bg-neutral-950">
-    <header
-      class="border-b border-pink-200 bg-pink-50/80 backdrop-blur dark:border-neutral-900 dark:bg-neutral-950/80"
-    >
-      <div class="mx-auto flex max-w-5xl items-center gap-3 px-4 py-4">
-        <img src="/icon.svg" alt="" class="h-10 w-10" aria-hidden="true">
-        <div>
-          <h1 class="text-lg font-medium text-pink-700 dark:text-pink-200">
-            {{ nombreApp }}
-          </h1>
-          <p class="text-xs text-gray-500 dark:text-gray-400">
-            Lista de regalos
-          </p>
-        </div>
-      </div>
+  <div class="min-h-screen bg-neutral-50 dark:bg-neutral-950">
+    <header class="px-4 pb-8 pt-10 text-center sm:pt-16">
+      <!-- El logo con la guirnalda es la pieza principal. <picture> elige
+           la variante clara u oscura sin JavaScript, así no parpadea al
+           cargar. Si el archivo todavía no está, cae al ícono simple. -->
+      <picture v-if="logoOk">
+        <source :srcset="LOGO_DARK" media="(prefers-color-scheme: dark)">
+        <img
+          :src="LOGO"
+          alt=""
+          class="mx-auto h-40 w-40 sm:h-52 sm:w-52"
+          aria-hidden="true"
+          @error="logoOk = false"
+        >
+      </picture>
+      <img
+        v-else
+        src="/icon.svg"
+        alt=""
+        class="mx-auto h-16 w-16"
+        aria-hidden="true"
+      >
+      <h1
+        class="mt-4 font-serif text-4xl italic text-pink-800 sm:text-5xl dark:text-pink-200"
+      >
+        {{ nombreApp }}
+      </h1>
+      <p class="mt-2 text-lg text-neutral-700 dark:text-neutral-300">
+        Florece donde estás plantada
+      </p>
+      <p class="mt-8 text-2xl tracking-[0.6em] text-pink-400" aria-hidden="true">
+        ❀
+      </p>
     </header>
 
     <main class="mx-auto max-w-5xl p-4 sm:p-6">
@@ -159,6 +184,47 @@ async function deshacer(itemId: number) {
       </UCard>
 
       <template v-else>
+        <!-- Muro de agradecimiento: solo lo ya recibido -->
+        <section v-if="recibidos.length > 0" class="mb-10">
+          <h2
+            class="mb-1 text-center font-serif text-2xl text-pink-800 dark:text-pink-200"
+          >
+            Regalos recibidos
+          </h2>
+          <p class="mb-5 text-center text-sm text-neutral-600 dark:text-neutral-400">
+            Con mucho cariño y gratitud.
+          </p>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <UCard v-for="r in recibidos" :key="r.id">
+              <div class="flex flex-col items-center text-center">
+                <img
+                  v-if="r.foto"
+                  :src="r.foto"
+                  alt=""
+                  class="mb-4 h-32 w-32 rounded-full border border-neutral-200 object-cover dark:border-neutral-800"
+                >
+                <div
+                  v-else
+                  class="mb-4 flex h-32 w-32 items-center justify-center rounded-full border border-neutral-200 bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900"
+                  aria-hidden="true"
+                >
+                  <UIcon name="i-heroicons-gift" class="h-10 w-10 text-pink-400" />
+                </div>
+                <p class="font-serif text-lg">{{ r.item }}</p>
+                <p class="mt-1 text-sm italic text-neutral-600 dark:text-neutral-400">
+                  de {{ r.persona }}
+                </p>
+              </div>
+            </UCard>
+          </div>
+        </section>
+
+        <h2
+          v-if="items.length > 0"
+          class="mb-1 text-center font-serif text-2xl text-pink-800 dark:text-pink-200"
+        >
+          Lista de deseos
+        </h2>
         <p class="mb-4 text-sm text-gray-600 dark:text-gray-300">
           Si querés regalar algo de esta lista, tocá «Yo lo regalo» y escribí
           tu nombre. Se aparta esa unidad para que nadie la repita, y tu
@@ -166,7 +232,7 @@ async function deshacer(itemId: number) {
         </p>
 
         <div v-if="misReservas.length > 0" class="mb-6">
-          <h2 class="mb-2 text-sm font-medium text-pink-700 dark:text-pink-200">
+          <h2 class="mb-2 text-sm font-medium text-pink-800 dark:text-pink-200">
             Lo que vas a regalar
           </h2>
           <div class="flex flex-wrap gap-2">
@@ -199,7 +265,7 @@ async function deshacer(itemId: number) {
         <section v-for="[categoria, deCategoria] in grupos" :key="categoria" class="mb-6">
           <h2
             v-if="categoria"
-            class="mb-2 text-sm font-medium text-pink-700 dark:text-pink-200"
+            class="mb-2 text-sm font-medium text-pink-800 dark:text-pink-200"
           >
             {{ categoria }}
           </h2>

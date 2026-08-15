@@ -32,9 +32,23 @@ class ItemPublicoOut(BaseModel):
     fotos: list[FotoItemOut] = []
 
 
+class RegaloPublicoOut(BaseModel):
+    """Una entrada del muro de agradecimiento.
+
+    Solo lleva lo que se agradece en público: qué fue y de parte de quién.
+    Las notas privadas del regalador no salen.
+    """
+
+    id: int
+    item: str
+    persona: str
+    foto: str | None = None
+
+
 class WishlistPublicaOut(BaseModel):
     nombre_app: str
     items: list[ItemPublicoOut]
+    recibidos: list[RegaloPublicoOut] = []
 
 
 class ReservarRequest(BaseModel):

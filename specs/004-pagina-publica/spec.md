@@ -1,7 +1,7 @@
 # Spec: Página pública de celebración
 
 ## Estado
-**Borrador inicial — no empezado.** Se construye después del
+Implementado. Se construyó después del
 [003-registro-regalos](../003-registro-regalos/spec.md), del que toma los
 datos. Este documento existe para no perder las decisiones ya tomadas.
 
@@ -57,8 +57,9 @@ outline-variant      #d7c1c1   bordes
 - **Tipografía**: serif (Libre Caslon Text o similar) para títulos de la
   página pública; la sans actual se mantiene en el admin, donde hay
   tablas y datos y se lee mejor.
-- **Ilustración floral**: va en `frontend/public/`. Pendiente de que el
-  usuario guarde el archivo en el repo.
+- **Ilustración floral**: va en `frontend/public/hero-flores.png`.
+  **Pendiente** de que el usuario guarde el archivo; mientras no esté, el
+  hero se sostiene con el ícono y la tipografía.
 
 ## Qué NO se toma del HTML exportado
 

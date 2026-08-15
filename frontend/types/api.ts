@@ -113,9 +113,18 @@ export interface ItemPublico {
   fotos: FotoItem[]
 }
 
+/** Una entrada del muro de agradecimiento de la página pública. */
+export interface RegaloPublico {
+  id: number
+  item: string
+  persona: string
+  foto: string | null
+}
+
 export interface WishlistPublica {
   nombre_app: string
   items: ItemPublico[]
+  recibidos: RegaloPublico[]
 }
 
 export const PRIORIDAD_LABEL: Record<Prioridad, string> = {

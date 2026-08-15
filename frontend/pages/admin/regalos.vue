@@ -50,7 +50,7 @@ async function agradecerTodos(persona: string) {
           to="/admin"
           aria-label="Volver al catálogo"
         />
-        <h2 class="text-xl font-medium text-pink-700 dark:text-pink-200">
+        <h2 class="text-xl font-medium text-pink-800 dark:text-pink-200">
           Regalos
         </h2>
         <UBadge v-if="totalPendientes > 0" color="amber" variant="subtle">

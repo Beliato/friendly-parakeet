@@ -92,7 +92,7 @@ async function borrar() {
         </p>
         <p
           v-if="props.mostrarPersona !== false && props.regalo.persona"
-          class="text-sm text-pink-600 dark:text-pink-300"
+          class="text-sm text-pink-700 dark:text-pink-300"
         >
           de {{ props.regalo.persona }}
         </p>
@@ -115,7 +115,7 @@ async function borrar() {
 
     <p
       v-if="props.regalo.nota"
-      class="mt-2 rounded-lg bg-pink-50 p-2 text-sm italic text-gray-600 dark:bg-neutral-900 dark:text-gray-300"
+      class="mt-2 rounded-lg bg-neutral-100 p-2 text-sm italic text-gray-600 dark:bg-neutral-900 dark:text-gray-300"
     >
       «{{ props.regalo.nota }}»
     </p>
@@ -141,7 +141,7 @@ async function borrar() {
         :key="foto.id"
         :href="foto.url"
         target="_blank"
-        class="group relative h-16 w-16 overflow-hidden rounded-lg border border-pink-200 dark:border-neutral-800"
+        class="group relative h-16 w-16 overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800"
       >
         <img :src="foto.url" alt="" class="h-full w-full object-cover">
         <button

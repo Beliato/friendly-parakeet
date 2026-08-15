@@ -10,12 +10,14 @@ from app.core.deps import get_current_admin
 from app.core.ratelimit import limiter
 from app.models.admin import Admin
 from app.models.item import EstadoItem, Item, Prioridad
+from app.models.regalo import OrigenRegalo, Regalo
 from app.models.reserva import Reserva
 from app.models.wishlist_config import WishlistConfig
 from app.schemas.wishlist import (
     ConfigOut,
     ConfigUpdate,
     ItemPublicoOut,
+    RegaloPublicoOut,
     ReservarRequest,
     ReservarResponse,
     ReservasCountOut,
@@ -121,6 +123,17 @@ def ver_wishlist(request: Request, share_token: str, db: Session = Depends(get_d
         .order_by(_ORDEN_PRIORIDAD, Item.created_at.desc())
         .all()
     )
+    # Muro de agradecimiento: solo lo ya recibido de parte de alguien. Las
+    # reservas pendientes todavía no son regalos, así que la sorpresa se
+    # preserva sola por cómo quedó el modelo.
+    recibidos = (
+        db.query(Regalo)
+        .options(selectinload(Regalo.fotos), selectinload(Regalo.item))
+        .filter(Regalo.origen == OrigenRegalo.REGALO, Regalo.persona != "")
+        .order_by(Regalo.fecha.desc(), Regalo.id.desc())
+        .all()
+    )
+
     return WishlistPublicaOut(
         nombre_app=config.nombre_app,
         items=[
@@ -137,6 +150,21 @@ def ver_wishlist(request: Request, share_token: str, db: Session = Depends(get_d
                 fotos=i.fotos,
             )
             for i in items
+        ],
+        recibidos=[
+            RegaloPublicoOut(
+                id=r.id,
+                item=r.item.nombre,
+                persona=r.persona,
+                # La foto de Julia usándolo es la que cuenta la historia;
+                # si no hay, se cae a la de referencia del catálogo.
+                foto=(
+                    r.fotos[0].url
+                    if r.fotos
+                    else (r.item.fotos[0].url if r.item.fotos else None)
+                ),
+            )
+            for r in recibidos
         ],
     )
 

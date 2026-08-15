@@ -195,7 +195,7 @@ async function quitarFoto(fotoId: number) {
             <div
               v-for="foto in props.item?.fotos"
               :key="foto.id"
-              class="group relative h-16 w-16 overflow-hidden rounded-lg border border-pink-200 dark:border-neutral-800"
+              class="group relative h-16 w-16 overflow-hidden rounded-lg border border-neutral-200 dark:border-neutral-800"
             >
               <img :src="foto.url" alt="" class="h-full w-full object-cover">
               <button
