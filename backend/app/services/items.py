@@ -1,8 +1,10 @@
 """Reglas compartidas de items y sus unidades."""
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.models.item import EstadoItem, Item
+from app.models.item import EstadoItem, Item, OrigenAdquisicion
+from app.models.regalo import OrigenRegalo, Regalo
 from app.models.reserva import Reserva
 
 
@@ -42,6 +44,34 @@ def primera_unidad_libre(db: Session, item_id: int) -> int:
     return unidad
 
 
+def recalcular_recibidas(db: Session, item: Item) -> None:
+    """cantidad_recibida se deriva de los regalos registrados.
+
+    Antes era un contador que se incrementaba a mano en varios lugares;
+    ahora los regalos son la única fuente de verdad. También actualiza
+    origen_adquisicion, que pasa a ser un resumen de esos regalos.
+    """
+    total = (
+        db.query(func.coalesce(func.sum(Regalo.cantidad), 0))
+        .filter(Regalo.item_id == item.id)
+        .scalar()
+    )
+    item.cantidad_recibida = min(int(total), item.cantidad)
+
+    if item.cantidad_recibida == 0:
+        item.origen_adquisicion = None
+    else:
+        hubo_regalo = (
+            db.query(Regalo)
+            .filter(Regalo.item_id == item.id, Regalo.origen == OrigenRegalo.REGALO)
+            .first()
+            is not None
+        )
+        item.origen_adquisicion = (
+            OrigenAdquisicion.REGALO if hubo_regalo else OrigenAdquisicion.NOSOTROS
+        )
+
+
 def recalcular_estado(db: Session, item: Item) -> None:
     """Deriva el estado del item de sus cantidades y reservas activas."""
     if item.cantidad_recibida >= item.cantidad:
@@ -50,3 +80,10 @@ def recalcular_estado(db: Session, item: Item) -> None:
         item.estado = EstadoItem.RESERVADO
     else:
         item.estado = EstadoItem.NECESITADO
+
+
+def recalcular_item(db: Session, item: Item) -> None:
+    """Recalcula cantidades y estado. Llamar tras tocar regalos o reservas."""
+    db.flush()
+    recalcular_recibidas(db, item)
+    recalcular_estado(db, item)

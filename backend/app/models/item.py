@@ -37,6 +37,16 @@ class RangoPrecio(str, enum.Enum):
     ALTO = "ALTO"
 
 
+class Etapa(str, enum.Enum):
+    CUALQUIERA = "CUALQUIERA"
+    RECIEN_NACIDO = "RECIEN_NACIDO"
+    M0_3 = "M0_3"
+    M3_6 = "M3_6"
+    M6_12 = "M6_12"
+    A1_2 = "A1_2"
+    A2_MAS = "A2_MAS"
+
+
 class Item(Base):
     __tablename__ = "items"
     __table_args__ = (
@@ -68,9 +78,7 @@ class Item(Base):
     origen_adquisicion: Mapped[OrigenAdquisicion | None] = mapped_column(
         Enum(OrigenAdquisicion)
     )
-    # Solo se popula al marcar adquirido. Mientras el item está RESERVADO, el
-    # nombre vive únicamente en Reserva.nombre_reservante (sorpresa real).
-    gifter_name: Mapped[str | None] = mapped_column(String(255))
+    etapa: Mapped[Etapa] = mapped_column(Enum(Etapa), default=Etapa.CUALQUIERA)
     caja_id: Mapped[int | None] = mapped_column(
         ForeignKey("cajas_almacenamiento.id", ondelete="SET NULL")
     )
@@ -94,6 +102,21 @@ class Item(Base):
     reservas = relationship(
         "Reserva", back_populates="item", cascade="all, delete-orphan"
     )
+    regalos = relationship(
+        "Regalo",
+        back_populates="item",
+        cascade="all, delete-orphan",
+        order_by="Regalo.fecha",
+    )
+
+    @property
+    def personas(self) -> list[str]:
+        """Quiénes regalaron este objeto, sin repetir y sin los vacíos."""
+        vistos: list[str] = []
+        for r in self.regalos:
+            if r.persona and r.persona not in vistos:
+                vistos.append(r.persona)
+        return vistos
 
     @property
     def reservas_activas(self) -> int:
