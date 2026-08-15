@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+from app.models.item import Prioridad, RangoPrecio
 from app.schemas.item import FotoItemOut
 
 
@@ -16,17 +17,19 @@ class WishlistLinkOut(BaseModel):
 
 
 class ItemPublicoOut(BaseModel):
-    """Vista de invitado: sin estado, sin origen, sin nombres — solo lo
-    necesario para elegir qué regalar."""
+    """Vista de invitado: sin estado interno, sin origen, sin nombres —
+    solo lo necesario para elegir qué regalar."""
 
     id: int
     nombre: str
     descripcion: str | None = None
     amazon_link: str | None = None
+    cantidad: int
+    disponibles: int
+    prioridad: Prioridad
+    rango_precio: RangoPrecio | None = None
+    categoria: str | None = None
     fotos: list[FotoItemOut] = []
-
-    class Config:
-        from_attributes = True
 
 
 class WishlistPublicaOut(BaseModel):
@@ -36,10 +39,12 @@ class WishlistPublicaOut(BaseModel):
 
 class ReservarRequest(BaseModel):
     nombre: str = Field(min_length=1, max_length=255)
+    mensaje: str | None = Field(default=None, max_length=500)
 
 
 class ReservarResponse(BaseModel):
     token_deshacer: str
+    unidad: int
 
 
 class ReservasCountOut(BaseModel):

@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy import case
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
@@ -8,10 +9,9 @@ from app.core.database import get_db
 from app.core.deps import get_current_admin
 from app.core.ratelimit import limiter
 from app.models.admin import Admin
-from app.models.item import EstadoItem, Item
+from app.models.item import EstadoItem, Item, Prioridad
 from app.models.reserva import Reserva
 from app.models.wishlist_config import WishlistConfig
-from app.schemas.item import ItemOut
 from app.schemas.wishlist import (
     ConfigOut,
     ConfigUpdate,
@@ -22,8 +22,20 @@ from app.schemas.wishlist import (
     WishlistLinkOut,
     WishlistPublicaOut,
 )
+from app.services.items import (
+    primera_unidad_libre,
+    recalcular_estado,
+    unidades_disponibles,
+)
 
 router = APIRouter(tags=["wishlist"])
+
+# Los urgentes primero en la vista pública.
+_ORDEN_PRIORIDAD = case(
+    (Item.prioridad == Prioridad.URGENTE, 0),
+    (Item.prioridad == Prioridad.NORMAL, 1),
+    else_=2,
+)
 
 
 def _get_config(db: Session) -> WishlistConfig:
@@ -81,42 +93,10 @@ def contar_reservas_pendientes(
     return ReservasCountOut(pendientes=pendientes)
 
 
-# --- Liberar reserva (admin, sin revelar nombre) ---
-
-
-@router.post("/items/{item_id}/liberar-reserva", response_model=ItemOut)
-def liberar_reserva(
-    item_id: int,
-    db: Session = Depends(get_db),
-    _: Admin = Depends(get_current_admin),
-):
-    item = (
-        db.query(Item)
-        .options(selectinload(Item.fotos), selectinload(Item.caja))
-        .filter(Item.id == item_id)
-        .first()
-    )
-    if not item:
-        raise HTTPException(status_code=404, detail="Item no encontrado")
-    reserva = (
-        db.query(Reserva)
-        .filter(Reserva.item_id == item_id, Reserva.released_at.is_(None))
-        .first()
-    )
-    if item.estado != EstadoItem.RESERVADO or not reserva:
-        raise HTTPException(
-            status_code=409, detail="El item no tiene una reserva activa"
-        )
-    # La reserva se descarta sin marcarse como revelada: el nombre del
-    # reservante nunca sale de la tabla reservas.
-    reserva.released_at = datetime.now(UTC)
-    item.estado = EstadoItem.NECESITADO
-    db.commit()
-    db.refresh(item)
-    return item
-
-
 # --- Wishlist pública ---
+#
+# Liberar y recibir unidades vive en routers/items.py, porque ahora es por
+# reserva individual (POST /items/{id}/reservas/{id}/liberar|recibir).
 
 
 def _get_config_por_token(share_token: str, db: Session) -> WishlistConfig:
@@ -136,14 +116,28 @@ def ver_wishlist(request: Request, share_token: str, db: Session = Depends(get_d
     config = _get_config_por_token(share_token, db)
     items = (
         db.query(Item)
-        .options(selectinload(Item.fotos))
+        .options(selectinload(Item.fotos), selectinload(Item.categoria))
         .filter(Item.estado == EstadoItem.NECESITADO)
-        .order_by(Item.created_at.desc())
+        .order_by(_ORDEN_PRIORIDAD, Item.created_at.desc())
         .all()
     )
     return WishlistPublicaOut(
         nombre_app=config.nombre_app,
-        items=[ItemPublicoOut.model_validate(i) for i in items],
+        items=[
+            ItemPublicoOut(
+                id=i.id,
+                nombre=i.nombre,
+                descripcion=i.descripcion,
+                amazon_link=i.amazon_link,
+                cantidad=i.cantidad,
+                disponibles=unidades_disponibles(db, i),
+                prioridad=i.prioridad,
+                rango_precio=i.rango_precio,
+                categoria=i.categoria.nombre if i.categoria else None,
+                fotos=i.fotos,
+            )
+            for i in items
+        ],
     )
 
 
@@ -161,23 +155,35 @@ def reservar_item(
     db: Session = Depends(get_db),
 ):
     _get_config_por_token(share_token, db)
-    item = db.query(Item).filter(Item.id == item_id).first()
+    # FOR UPDATE serializa las reservas del mismo item: el chequeo de
+    # disponibilidad y la asignación de unidad ocurren sin carreras.
+    item = db.query(Item).filter(Item.id == item_id).with_for_update().first()
     if not item:
         raise HTTPException(status_code=404, detail="Item no encontrado")
-    if item.estado != EstadoItem.NECESITADO:
+    if unidades_disponibles(db, item) < 1:
         raise HTTPException(status_code=409, detail="El item ya no está disponible")
-    reserva = Reserva(item_id=item_id, nombre_reservante=body.nombre.strip())
-    item.estado = EstadoItem.RESERVADO
+
+    reserva = Reserva(
+        item_id=item_id,
+        unidad=primera_unidad_libre(db, item_id),
+        nombre_reservante=body.nombre.strip(),
+        mensaje=(body.mensaje or "").strip() or None,
+    )
     db.add(reserva)
+    db.flush()
+    recalcular_estado(db, item)
     try:
         db.commit()
     except IntegrityError as e:
-        # Índice único parcial: otro invitado reservó en simultáneo.
+        # Índice único parcial: segunda línea de defensa si el lock no
+        # alcanzó (por ejemplo, con otro nivel de aislamiento).
         db.rollback()
         raise HTTPException(
             status_code=409, detail="El item ya no está disponible"
         ) from e
-    return ReservarResponse(token_deshacer=reserva.token_deshacer)
+    return ReservarResponse(
+        token_deshacer=reserva.token_deshacer, unidad=reserva.unidad
+    )
 
 
 @router.post("/w/reservas/{token_deshacer}/deshacer", response_model=ConfigOut)
@@ -197,7 +203,8 @@ def deshacer_reserva(
         raise HTTPException(status_code=404, detail="Reserva no encontrada")
     item = db.query(Item).filter(Item.id == reserva.item_id).first()
     reserva.released_at = datetime.now(UTC)
-    if item and item.estado == EstadoItem.RESERVADO:
-        item.estado = EstadoItem.NECESITADO
+    db.flush()
+    if item:
+        recalcular_estado(db, item)
     db.commit()
     return ConfigOut(nombre_app=_get_config(db).nombre_app)

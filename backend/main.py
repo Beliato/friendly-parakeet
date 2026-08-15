@@ -6,7 +6,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.core.ratelimit import limiter
-from app.routers import auth, cajas, fotos, items, wishlist
+from app.routers import auth, cajas, categorias, fotos, items, wishlist
 
 app = FastAPI(
     title="Julia en Camino API",
@@ -52,6 +52,7 @@ app.include_router(auth.router)
 app.include_router(items.router)
 app.include_router(cajas.router)
 app.include_router(cajas.items_router)
+app.include_router(categorias.router)
 app.include_router(fotos.router)
 app.include_router(wishlist.router)
 
