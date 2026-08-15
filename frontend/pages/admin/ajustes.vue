@@ -55,7 +55,7 @@ async function guardarNombre() {
         to="/admin"
         aria-label="Volver al catálogo"
       />
-      <h2 class="text-xl font-medium text-pink-700 dark:text-pink-200">
+      <h2 class="text-xl font-medium text-pink-800 dark:text-pink-200">
         Ajustes
       </h2>
     </div>

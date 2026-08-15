@@ -140,7 +140,7 @@ function salir() {
   <div class="space-y-4">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <div class="flex items-center gap-3">
-        <h2 class="text-xl font-medium text-pink-700 dark:text-pink-200">
+        <h2 class="text-xl font-medium text-pink-800 dark:text-pink-200">
           Catálogo
         </h2>
         <UBadge v-if="items.pendientes > 0" color="amber" variant="subtle">
@@ -199,7 +199,7 @@ function salir() {
       <p v-if="resultados.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
         No encontramos nada con «{{ busqueda }}».
       </p>
-      <ul v-else class="divide-y divide-pink-100 dark:divide-neutral-800">
+      <ul v-else class="divide-y divide-neutral-200 dark:divide-neutral-800">
         <li
           v-for="r in resultados"
           :key="r.id"
