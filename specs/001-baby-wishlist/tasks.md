@@ -197,5 +197,5 @@ Depende de todas las anteriores funcionando localmente.
 
 ## Fase 13 — Polish
 
-- [ ] T062 [P] Revisión responsive/mobile-first en todas las páginas
-- [ ] T063 [P] README con instrucciones de setup local y deploy
+- [x] T062 [P] Revisión responsive/mobile-first en todas las páginas
+- [x] T063 [P] README con instrucciones de setup local y deploy
