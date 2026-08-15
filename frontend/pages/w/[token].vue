@@ -22,8 +22,8 @@ const mensajeInvitado = ref('')
 const enviando = ref(false)
 // Se ata en runtime y no como src estático: si el archivo todavía no está
 // en public/, Vite fallaría al resolver el import en build.
-const ILUSTRACION = '/hero-flores.png'
-const ilustracionOk = ref(true)
+const LOGO = '/logo-julia.png'
+const logoOk = ref(true)
 
 // Items reservados desde este navegador ya no vienen en la lista pública,
 // así que se muestran aparte para poder deshacerlos.
@@ -138,7 +138,23 @@ async function deshacer(itemId: number) {
 <template>
   <div class="min-h-screen bg-neutral-50 dark:bg-neutral-950">
     <header class="px-4 pb-8 pt-10 text-center sm:pt-16">
-      <img src="/icon.svg" alt="" class="mx-auto h-16 w-16" aria-hidden="true">
+      <!-- El logo con la guirnalda es la pieza principal; si todavía no
+           está en public/, cae al ícono simple sin romper nada. -->
+      <img
+        v-if="logoOk"
+        :src="LOGO"
+        alt=""
+        class="mx-auto w-full max-w-md"
+        aria-hidden="true"
+        @error="logoOk = false"
+      >
+      <img
+        v-else
+        src="/icon.svg"
+        alt=""
+        class="mx-auto h-16 w-16"
+        aria-hidden="true"
+      >
       <h1
         class="mt-4 font-serif text-4xl italic text-pink-800 sm:text-5xl dark:text-pink-200"
       >
@@ -147,15 +163,6 @@ async function deshacer(itemId: number) {
       <p class="mt-2 text-lg text-neutral-700 dark:text-neutral-300">
         Florece donde estás plantada
       </p>
-      <!-- La ilustración es opcional: si el archivo no está, el hero se
-           sostiene igual con el ícono y la tipografía. -->
-      <img
-        v-if="ilustracionOk"
-        :src="ILUSTRACION"
-        alt=""
-        class="mx-auto mt-8 w-full max-w-3xl rounded-2xl object-cover"
-        @error="ilustracionOk = false"
-      >
       <p class="mt-8 text-2xl tracking-[0.6em] text-pink-400" aria-hidden="true">
         ❀
       </p>
