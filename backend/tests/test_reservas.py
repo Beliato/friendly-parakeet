@@ -80,7 +80,9 @@ def test_liberar_reserva_admin_no_expone_nombre(
     client, auth_headers, item_reservado, db
 ):
     item, reserva = item_reservado
-    r = client.post(f"/items/{item.id}/liberar-reserva", headers=auth_headers)
+    r = client.post(
+        f"/items/{item.id}/reservas/{reserva.id}/liberar", headers=auth_headers
+    )
     assert r.status_code == 200
     assert r.json()["estado"] == "NECESITADO"
     assert "Abuela Marta" not in r.text
@@ -89,14 +91,24 @@ def test_liberar_reserva_admin_no_expone_nombre(
     assert reserva.revelado is False
 
 
-def test_liberar_sin_reserva_activa_da_409(client, auth_headers, item):
-    r = client.post(f"/items/{item.id}/liberar-reserva", headers=auth_headers)
-    assert r.status_code == 409
+def test_liberar_reserva_inexistente_da_404(client, auth_headers, item):
+    r = client.post(f"/items/{item.id}/reservas/999/liberar", headers=auth_headers)
+    assert r.status_code == 404
 
 
 def test_liberar_requiere_auth(client, item_reservado):
+    item, reserva = item_reservado
+    r = client.post(f"/items/{item.id}/reservas/{reserva.id}/liberar")
+    assert r.status_code == 403
+
+
+def test_listar_reservas_no_expone_nombres(client, auth_headers, item_reservado):
     item, _ = item_reservado
-    assert client.post(f"/items/{item.id}/liberar-reserva").status_code == 403
+    r = client.get(f"/items/{item.id}/reservas", headers=auth_headers)
+    assert r.status_code == 200
+    assert len(r.json()) == 1
+    assert r.json()[0]["dias_desde_reserva"] == 0
+    assert "Abuela Marta" not in r.text
 
 
 def test_contador_pendientes(client, auth_headers, config, item, db):

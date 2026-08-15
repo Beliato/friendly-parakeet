@@ -14,9 +14,16 @@ function item(over: Partial<Item> = {}): Item {
     nombre: 'Cuna',
     descripcion: null,
     amazon_link: null,
+    cantidad: 1,
+    cantidad_recibida: 0,
+    reservas_activas: 0,
+    prioridad: 'NORMAL',
+    rango_precio: null,
+    categoria: null,
     estado: 'NECESITADO',
     origen_adquisicion: null,
-    gifter_name: null,
+    personas: [],
+    etapa: 'CUALQUIERA',
     caja: null,
     fotos: [],
     created_at: '2026-01-01T00:00:00Z',
@@ -65,7 +72,7 @@ describe('store items', () => {
           id: 1,
           estado: 'ADQUIRIDO',
           origen_adquisicion: 'REGALO',
-          gifter_name: 'Abuela Marta',
+          personas: ['Abuela Marta'],
         }),
       )
       .mockResolvedValueOnce({ pendientes: 0 })
@@ -73,21 +80,79 @@ describe('store items', () => {
     await store.adquirir(1, 'REGALO')
 
     expect(store.items[0]!.estado).toBe('ADQUIRIDO')
-    expect(store.items[0]!.gifter_name).toBe('Abuela Marta')
+    expect(store.items[0]!.personas).toEqual(['Abuela Marta'])
     expect(store.pendientes).toBe(0)
   })
 
-  it('liberarReserva devuelve el item a necesitado sin nombre', async () => {
+  it('liberarUnidad devuelve el item a necesitado sin nombre', async () => {
     const store = useItemsStore()
     store.items = [item({ id: 1, estado: 'RESERVADO' })]
     apiMock
       .mockResolvedValueOnce(item({ id: 1, estado: 'NECESITADO' }))
       .mockResolvedValueOnce({ pendientes: 0 })
 
-    await store.liberarReserva(1)
+    await store.liberarUnidad(1, 42)
 
+    expect(apiMock).toHaveBeenCalledWith(
+      '/items/1/reservas/42/liberar',
+      expect.objectContaining({ method: 'POST' }),
+    )
     expect(store.items[0]!.estado).toBe('NECESITADO')
-    expect(store.items[0]!.gifter_name).toBeNull()
+    expect(store.items[0]!.personas).toEqual([])
+  })
+
+  it('fetchReservas trae las reservas sin nombres', async () => {
+    const store = useItemsStore()
+    apiMock.mockResolvedValue([
+      { id: 42, unidad: 1, dias_desde_reserva: 90 },
+    ])
+    const reservas = await store.fetchReservas(1)
+    expect(reservas).toHaveLength(1)
+    expect(reservas[0]).not.toHaveProperty('nombre_reservante')
+  })
+
+  it('recibirUnidad revela el nombre y actualiza el item', async () => {
+    const store = useItemsStore()
+    store.items = [item({ id: 1, cantidad: 2, estado: 'RESERVADO' })]
+    apiMock
+      .mockResolvedValueOnce({
+        nombre: 'Prima Sofía',
+        mensaje: 'Con cariño',
+        item: item({
+          id: 1,
+          cantidad: 2,
+          cantidad_recibida: 1,
+          estado: 'NECESITADO',
+          personas: ['Prima Sofía'],
+        }),
+      })
+      .mockResolvedValueOnce({ pendientes: 0 })
+
+    const revelada = await store.recibirUnidad(1, 42)
+
+    expect(revelada.nombre).toBe('Prima Sofía')
+    expect(revelada.mensaje).toBe('Con cariño')
+    expect(store.items[0]!.cantidad_recibida).toBe(1)
+    // Con unidades pendientes el item vuelve a la lista pública.
+    expect(store.items[0]!.estado).toBe('NECESITADO')
+  })
+
+  it('buscar consulta el endpoint con el query', async () => {
+    const store = useItemsStore()
+    apiMock.mockResolvedValue([
+      {
+        id: 1,
+        nombre: 'Termómetro',
+        descripcion: null,
+        estado: 'ADQUIRIDO',
+        caja: { id: 3, etiqueta: 'Caja B', descripcion: 'Closet' },
+      },
+    ])
+    const res = await store.buscar('termo')
+    expect(apiMock).toHaveBeenCalledWith('/items/buscar', {
+      query: { q: 'termo' },
+    })
+    expect(res[0]!.caja!.etiqueta).toBe('Caja B')
   })
 
   it('eliminar saca el item del listado', async () => {

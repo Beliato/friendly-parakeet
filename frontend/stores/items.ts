@@ -1,5 +1,23 @@
 import { defineStore } from 'pinia'
-import type { Item, OrigenAdquisicion } from '~/types/api'
+import type {
+  Item,
+  ItemBusqueda,
+  OrigenAdquisicion,
+  Prioridad,
+  RangoPrecio,
+  ReservaAdmin,
+  ReservaRevelada,
+} from '~/types/api'
+
+interface ItemPayload {
+  nombre?: string
+  descripcion?: string | null
+  amazon_link?: string | null
+  cantidad?: number
+  prioridad?: Prioridad
+  rango_precio?: RangoPrecio | null
+  categoria_id?: number | null
+}
 
 export const useItemsStore = defineStore('items', {
   state: () => ({
@@ -28,24 +46,13 @@ export const useItemsStore = defineStore('items', {
       )
       this.pendientes = data.pendientes
     },
-    async crear(body: {
-      nombre: string
-      descripcion?: string | null
-      amazon_link?: string | null
-    }) {
+    async crear(body: ItemPayload & { nombre: string }) {
       const api = useApi()
       const item = await api<Item>('/items', { method: 'POST', body })
       this.items.unshift(item)
       return item
     },
-    async editar(
-      id: number,
-      body: {
-        nombre?: string
-        descripcion?: string | null
-        amazon_link?: string | null
-      },
-    ) {
+    async editar(id: number, body: ItemPayload) {
       const api = useApi()
       const item = await api<Item>(`/items/${id}`, { method: 'PATCH', body })
       this._reemplazar(item)
@@ -70,14 +77,33 @@ export const useItemsStore = defineStore('items', {
       await api(`/items/${id}`, { method: 'DELETE' })
       this.items = this.items.filter((i) => i.id !== id)
     },
-    async liberarReserva(id: number) {
+    async fetchReservas(itemId: number) {
       const api = useApi()
-      const item = await api<Item>(`/items/${id}/liberar-reserva`, {
-        method: 'POST',
-      })
+      return await api<ReservaAdmin[]>(`/items/${itemId}/reservas`)
+    },
+    async recibirUnidad(itemId: number, reservaId: number) {
+      const api = useApi()
+      const revelada = await api<ReservaRevelada>(
+        `/items/${itemId}/reservas/${reservaId}/recibir`,
+        { method: 'POST' },
+      )
+      this._reemplazar(revelada.item)
+      await this.fetchPendientes()
+      return revelada
+    },
+    async liberarUnidad(itemId: number, reservaId: number) {
+      const api = useApi()
+      const item = await api<Item>(
+        `/items/${itemId}/reservas/${reservaId}/liberar`,
+        { method: 'POST' },
+      )
       this._reemplazar(item)
       await this.fetchPendientes()
       return item
+    },
+    async buscar(q: string) {
+      const api = useApi()
+      return await api<ItemBusqueda[]>('/items/buscar', { query: { q } })
     },
     async asignarCaja(id: number, cajaId: number | null) {
       const api = useApi()

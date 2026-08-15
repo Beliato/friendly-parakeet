@@ -1,28 +1,57 @@
 <script setup lang="ts">
-import type { Item } from '~/types/api'
+import type { Etapa, Item, Prioridad, RangoPrecio } from '~/types/api'
+import { ETAPAS, ETAPA_LABEL } from '~/types/api'
 
 const props = defineProps<{ item?: Item | null }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
 
 const items = useItemsStore()
+const categorias = useCategoriasStore()
 const toast = useToast()
+
+const SIN_CATEGORIA = 0
 
 const nombre = ref(props.item?.nombre ?? '')
 const descripcion = ref(props.item?.descripcion ?? '')
 const amazonLink = ref(props.item?.amazon_link ?? '')
+const cantidad = ref(props.item?.cantidad ?? 1)
+const prioridad = ref<Prioridad>(props.item?.prioridad ?? 'NORMAL')
+const rangoPrecio = ref<RangoPrecio | ''>(props.item?.rango_precio ?? '')
+const categoriaId = ref<number>(props.item?.categoria?.id ?? SIN_CATEGORIA)
+const etapa = ref<Etapa>(props.item?.etapa ?? 'CUALQUIERA')
+const nuevaCategoria = ref('')
+const creandoCategoria = ref(false)
 const guardando = ref(false)
 const subiendoFoto = ref(false)
 const fileInput = ref<HTMLInputElement>()
 
 const esEdicion = computed(() => !!props.item)
 
+onMounted(() => categorias.fetchAll())
+
+const opcionesCategoria = computed(() => [
+  { value: SIN_CATEGORIA, label: 'Sin categoría' },
+  ...categorias.categorias.map((c) => ({ value: c.id, label: c.nombre })),
+])
+
 async function guardar() {
   guardando.value = true
   try {
+    let catId: number | null =
+      categoriaId.value === SIN_CATEGORIA ? null : categoriaId.value
+    if (creandoCategoria.value && nuevaCategoria.value.trim()) {
+      const creada = await categorias.crear(nuevaCategoria.value.trim())
+      catId = creada.id
+    }
     const body = {
       nombre: nombre.value.trim(),
       descripcion: descripcion.value.trim() || null,
       amazon_link: amazonLink.value.trim() || null,
+      cantidad: cantidad.value,
+      prioridad: prioridad.value,
+      rango_precio: rangoPrecio.value || null,
+      categoria_id: catId,
+      etapa: etapa.value,
     }
     if (props.item) {
       await items.editar(props.item.id, body)
@@ -31,10 +60,14 @@ async function guardar() {
     }
     emit('saved')
     emit('close')
-  } catch {
+  } catch (e: unknown) {
+    const status = (e as { statusCode?: number }).statusCode
     toast.add({
       title: 'No se pudo guardar',
-      description: 'Revisa los datos (el link debe ser una URL válida).',
+      description:
+        status === 409
+          ? 'No podés bajar la cantidad por debajo de lo ya reservado o recibido.'
+          : 'Revisá los datos (el link debe ser una URL válida).',
       color: 'red',
     })
   } finally {
@@ -52,7 +85,8 @@ async function onFotoSeleccionada(e: Event) {
   } catch {
     toast.add({
       title: 'No se pudo subir la foto',
-      description: 'Solo imágenes jpeg/png/webp de hasta 5 MB (requiere R2 configurado).',
+      description:
+        'Solo imágenes jpeg/png/webp de hasta 5 MB (requiere R2 configurado).',
       color: 'red',
     })
   } finally {
@@ -87,6 +121,68 @@ async function quitarFoto(fotoId: number) {
 
         <UFormGroup label="Descripción">
           <UTextarea v-model="descripcion" :rows="2" placeholder="Color, talla, referencia…" />
+        </UFormGroup>
+
+        <div class="grid grid-cols-2 gap-3">
+          <UFormGroup label="¿Cuántos necesitan?">
+            <UInput v-model.number="cantidad" type="number" min="1" max="99" />
+          </UFormGroup>
+
+          <UFormGroup label="Rango de precio">
+            <USelect
+              v-model="rangoPrecio"
+              :options="[
+                { value: '', label: 'Sin indicar' },
+                { value: 'BAJO', label: '$ — económico' },
+                { value: 'MEDIO', label: '$$ — medio' },
+                { value: 'ALTO', label: '$$$ — caro' },
+              ]"
+            />
+          </UFormGroup>
+        </div>
+
+        <UFormGroup label="¿Para qué etapa es?">
+          <USelect
+            v-model="etapa"
+            :options="ETAPAS.map((e) => ({ value: e, label: ETAPA_LABEL[e] }))"
+          />
+        </UFormGroup>
+
+        <UFormGroup label="Prioridad">
+          <USelect
+            v-model="prioridad"
+            :options="[
+              { value: 'URGENTE', label: 'Urgente — hace falta ya' },
+              { value: 'NORMAL', label: 'Normal' },
+              { value: 'PUEDE_ESPERAR', label: 'Puede esperar' },
+            ]"
+          />
+        </UFormGroup>
+
+        <UFormGroup label="Categoría">
+          <template v-if="!creandoCategoria">
+            <USelectMenu
+              v-model="categoriaId"
+              :options="opcionesCategoria"
+              value-attribute="value"
+              option-attribute="label"
+            />
+            <UButton
+              variant="link"
+              size="xs"
+              icon="i-heroicons-plus"
+              class="mt-1"
+              @click="creandoCategoria = true"
+            >
+              Crear categoría nueva
+            </UButton>
+          </template>
+          <template v-else>
+            <UInput v-model="nuevaCategoria" placeholder="Ropa, higiene, paseo…" />
+            <UButton variant="link" size="xs" class="mt-1" @click="creandoCategoria = false">
+              Usar una existente
+            </UButton>
+          </template>
         </UFormGroup>
 
         <UFormGroup label="Link de Amazon (o tienda)">

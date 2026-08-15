@@ -26,10 +26,12 @@ jobs:
         run: npm ci
 
       - name: Typecheck
-        run: npx vue-tsc --noEmit
+        run: npm run typecheck
 
       - name: Lint
         run: npx eslint .
 
+      # Va último: el entorno de Vitest regenera .nuxt sin el módulo PWA,
+      # y el typecheck necesita los tipos con PWA incluido.
       - name: Tests con gate de coverage
         run: npx vitest run --coverage

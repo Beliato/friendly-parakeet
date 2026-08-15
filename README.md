@@ -4,26 +4,38 @@
   <p>Catálogo y wishlist para la llegada de un bebé.</p>
 </div>
 
-Una app para que una pareja lleve el catálogo de todo lo que necesita,
-sepa qué ya tiene y en qué caja lo guardó, y comparta una wishlist con
-familiares y amigos para evitar regalos duplicados — **preservando la
-sorpresa de quién regaló qué** hasta que el regalo llega.
+Una app para llevar el registro de **qué recibieron, de parte de quién y
+dónde quedó guardado** durante todo el proceso de la llegada de un bebé.
+Incluye una wishlist compartible para coordinar con la familia y evitar
+regalos duplicados, preservando la sorpresa de quién regaló qué hasta que
+el regalo llega.
 
 ## Cómo funciona
 
-**Para la pareja (admin):** cargan items con foto y link de tienda, marcan
-lo que ya tienen (comprado o regalado), y le asignan una caja de
-almacenamiento para encontrarlo después.
+**Registrar lo que llega:** un botón anota "recibimos X de parte de Y" en
+un solo paso — si el objeto no estaba en el catálogo se crea ahí mismo, y
+el nombre de la persona se autocompleta con los que ya usaron para que no
+queden variantes del mismo nombre. Se le puede sumar una foto de Julia
+usando el regalo, para mandársela después a quien lo dio.
+
+**Agradecer sin olvidarse de nadie:** una vista agrupa todo lo que regaló
+cada persona y marca a quién falta agradecer.
+
+**Encontrar las cosas:** cada objeto lleva su etapa (recién nacido, 0-3
+meses…) y su caja de almacenamiento. El buscador responde "¿dónde
+guardamos el termómetro?" mostrando caja, etapa y quién lo regaló.
 
 **Para los invitados:** entran con un link, sin crear cuenta, y marcan qué
-van a regalar. El item desaparece de la lista para que nadie lo repita.
+van a regalar, con un mensaje opcional. De los items que se necesitan de a
+varios (bodies, pañales) cada uno aparta una unidad y el resto sigue
+disponible.
 
-**La sorpresa:** cuando alguien reserva un item, su nombre queda guardado
-pero **nadie puede verlo — ni la pareja**. Se revela recién cuando marcan
-el regalo como recibido. Esto no es una regla de UI: el schema de la API
-simplemente no expone ese campo mientras el item está reservado, y hay
-tests que verifican que el nombre no aparece en ningún byte de ninguna
-respuesta de admin.
+**La sorpresa:** cuando alguien reserva, su nombre y su mensaje quedan
+guardados pero **nadie puede verlos — ni la pareja**. Se revelan recién al
+marcar ese regalo como recibido, y de a uno: recibir una unidad no delata
+a quienes reservaron las otras. Esto no es una regla de UI — el schema de
+la API simplemente no expone esos campos, y hay tests que verifican que el
+nombre no aparece en ningún byte de ninguna respuesta de admin.
 
 ## Stack
 
@@ -135,8 +147,17 @@ Root directory `frontend`, framework Nuxt (autodetectado). Configurá
 
 ## Documentación del diseño
 
-El proyecto se construyó con spec-driven development. Los tres documentos
-viven en [`specs/001-baby-wishlist/`](specs/001-baby-wishlist/):
+El proyecto se construyó con spec-driven development, en tandas:
+
+- [`001-baby-wishlist/`](specs/001-baby-wishlist/) — la app base.
+- [`002-mejoras/`](specs/002-mejoras/) — cantidad, categorías, prioridad,
+  precio, buscador, mensaje y PWA.
+- [`003-registro-regalos/`](specs/003-registro-regalos/) — el registro de
+  regalos, agradecimientos, etapas y las fotos de Julia.
+- [`004-pagina-publica/`](specs/004-pagina-publica/) — la página de
+  celebración. **Pendiente**, solo las decisiones tomadas.
+
+Cada tanda tiene los mismos tres documentos:
 
 - [`spec.md`](specs/001-baby-wishlist/spec.md) — el qué y el por qué:
   historias de usuario y reglas de negocio.
