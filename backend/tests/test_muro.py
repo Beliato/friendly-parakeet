@@ -27,18 +27,14 @@ def test_muro_excluye_las_compras_propias(client, auth_headers, config, item):
 def test_una_reserva_pendiente_no_llega_al_muro(client, config, item):
     """La sorpresa: mientras está reservado no hay regalo, así que el
     nombre no puede aparecer en público."""
-    client.post(
-        f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Tía Secreta"}
-    )
+    client.post(f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Tía Secreta"})
     publico = client.get(f"/w/{TOKEN}")
     assert publico.json()["recibidos"] == []
     assert "Tía Secreta" not in publico.text
 
 
 def test_el_nombre_aparece_recien_al_recibir(client, auth_headers, config, item):
-    client.post(
-        f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Tía Secreta"}
-    )
+    client.post(f"/w/{TOKEN}/items/{item.id}/reservar", json={"nombre": "Tía Secreta"})
     reservas = client.get(f"/items/{item.id}/reservas", headers=auth_headers).json()
     client.post(
         f"/items/{item.id}/reservas/{reservas[0]['id']}/recibir",
@@ -58,9 +54,7 @@ def test_el_muro_no_expone_la_nota_privada(client, auth_headers, config, item):
     assert "secreto entre nosotros" not in publico.text
 
 
-def test_el_muro_usa_la_foto_de_julia_si_existe(
-    client, auth_headers, config, item, db
-):
+def test_el_muro_usa_la_foto_de_julia_si_existe(client, auth_headers, config, item, db):
     from app.models.item import FotoItem
     from app.models.regalo import FotoRegalo
 
