@@ -1,7 +1,14 @@
 import enum
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -18,13 +25,43 @@ class OrigenAdquisicion(str, enum.Enum):
     REGALO = "REGALO"
 
 
+class Prioridad(str, enum.Enum):
+    URGENTE = "URGENTE"
+    NORMAL = "NORMAL"
+    PUEDE_ESPERAR = "PUEDE_ESPERAR"
+
+
+class RangoPrecio(str, enum.Enum):
+    BAJO = "BAJO"
+    MEDIO = "MEDIO"
+    ALTO = "ALTO"
+
+
 class Item(Base):
     __tablename__ = "items"
+    __table_args__ = (
+        CheckConstraint("cantidad >= 1", name="ck_items_cantidad_positiva"),
+        CheckConstraint(
+            "cantidad_recibida >= 0 AND cantidad_recibida <= cantidad",
+            name="ck_items_recibida_valida",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nombre: Mapped[str] = mapped_column(String(255))
     descripcion: Mapped[str | None] = mapped_column(String(1000))
     amazon_link: Mapped[str | None] = mapped_column(String(2000))
+    cantidad: Mapped[int] = mapped_column(Integer, default=1)
+    cantidad_recibida: Mapped[int] = mapped_column(Integer, default=0)
+    prioridad: Mapped[Prioridad] = mapped_column(
+        Enum(Prioridad), default=Prioridad.NORMAL
+    )
+    rango_precio: Mapped[RangoPrecio | None] = mapped_column(Enum(RangoPrecio))
+    categoria_id: Mapped[int | None] = mapped_column(
+        ForeignKey("categorias.id", ondelete="SET NULL")
+    )
+    # Derivado de cantidad/cantidad_recibida/reservas activas — ver
+    # recalcular_estado(). Se persiste para poder filtrar e indexar.
     estado: Mapped[EstadoItem] = mapped_column(
         Enum(EstadoItem), default=EstadoItem.NECESITADO, index=True
     )
@@ -47,6 +84,7 @@ class Item(Base):
     )
 
     caja = relationship("CajaAlmacenamiento")
+    categoria = relationship("Categoria")
     fotos = relationship(
         "FotoItem",
         back_populates="item",
