@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ItemPublico, WishlistPublica } from '~/types/api'
+import { RANGO_PRECIO_LABEL } from '~/types/api'
 
 definePageMeta({ layout: false })
 
@@ -16,11 +17,28 @@ const error = ref(false)
 
 const itemReservando = ref<ItemPublico | null>(null)
 const nombreInvitado = ref('')
+const mensajeInvitado = ref('')
 const enviando = ref(false)
 
 // Items reservados desde este navegador ya no vienen en la lista pública,
 // así que se muestran aparte para poder deshacerlos.
 const misReservas = computed(() => Object.keys(reservas.value).map(Number))
+
+/** Agrupa por categoría preservando el orden por prioridad del backend. */
+const grupos = computed(() => {
+  const mapa = new Map<string, ItemPublico[]>()
+  for (const item of items.value) {
+    const clave = item.categoria ?? ''
+    if (!mapa.has(clave)) mapa.set(clave, [])
+    mapa.get(clave)!.push(item)
+  }
+  // Los items sin categoría van al final.
+  return [...mapa.entries()].sort(([a], [b]) => {
+    if (a === '') return 1
+    if (b === '') return -1
+    return a.localeCompare(b)
+  })
+})
 
 async function fetchWishlist() {
   cargando.value = true
@@ -50,18 +68,23 @@ async function reservar() {
   enviando.value = true
   const item = itemReservando.value
   try {
-    const data = await $fetch<{ token_deshacer: string }>(
+    const data = await $fetch<{ token_deshacer: string; unidad: number }>(
       `/w/${token.value}/items/${item.id}/reservar`,
       {
         method: 'POST',
         baseURL: runtime.public.apiBase,
-        body: { nombre: nombreInvitado.value.trim() },
+        body: {
+          nombre: nombreInvitado.value.trim(),
+          mensaje: mensajeInvitado.value.trim() || null,
+        },
       },
     )
     guardar(item.id, data.token_deshacer)
-    items.value = items.value.filter((i) => i.id !== item.id)
+    // Con varias unidades el item sigue disponible para otros.
+    await fetchWishlist()
     itemReservando.value = null
     nombreInvitado.value = ''
+    mensajeInvitado.value = ''
     toast.add({
       title: '¡Gracias! 🎁',
       description: `Anotamos que vos traés «${item.nombre}». Tu nombre queda en secreto hasta que lo reciban.`,
@@ -74,7 +97,7 @@ async function reservar() {
       title: status === 409 ? 'Alguien se adelantó' : 'No se pudo reservar',
       description:
         status === 409
-          ? 'Otra persona ya reservó este regalo. Elegí otro de la lista.'
+          ? 'Ya no quedan unidades de este regalo. Elegí otro de la lista.'
           : 'Intentá de nuevo en un momento.',
       color: 'red',
     })
@@ -138,8 +161,8 @@ async function deshacer(itemId: number) {
       <template v-else>
         <p class="mb-4 text-sm text-gray-600 dark:text-gray-300">
           Si querés regalar algo de esta lista, tocá «Yo lo regalo» y escribí
-          tu nombre. El item desaparece para que nadie lo repita, y tu nombre
-          queda en secreto hasta que reciban el regalo.
+          tu nombre. Se aparta esa unidad para que nadie la repita, y tu
+          nombre queda en secreto hasta que reciban el regalo.
         </p>
 
         <div v-if="misReservas.length > 0" class="mb-6">
@@ -173,36 +196,71 @@ async function deshacer(itemId: number) {
           </p>
         </UCard>
 
-        <div v-else class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <UCard v-for="item in items" :key="item.id">
-            <img
-              v-if="item.fotos.length > 0"
-              :src="item.fotos[0]!.url"
-              alt=""
-              class="mb-3 h-40 w-full rounded-lg object-cover"
-            >
-            <p class="font-medium">{{ item.nombre }}</p>
-            <p
-              v-if="item.descripcion"
-              class="mt-1 text-sm text-gray-500 dark:text-gray-400"
-            >
-              {{ item.descripcion }}
-            </p>
-            <div class="mt-3 flex items-center gap-2">
-              <UButton size="sm" @click="itemReservando = item">
-                Yo lo regalo
-              </UButton>
-              <ULink
-                v-if="item.amazon_link"
-                :to="item.amazon_link"
-                target="_blank"
-                class="text-xs text-pink-600 underline dark:text-pink-300"
+        <section v-for="[categoria, deCategoria] in grupos" :key="categoria" class="mb-6">
+          <h2
+            v-if="categoria"
+            class="mb-2 text-sm font-medium text-pink-700 dark:text-pink-200"
+          >
+            {{ categoria }}
+          </h2>
+          <h2
+            v-else-if="grupos.length > 1"
+            class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-400"
+          >
+            Otros
+          </h2>
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <UCard v-for="item in deCategoria" :key="item.id">
+              <img
+                v-if="item.fotos.length > 0"
+                :src="item.fotos[0]!.url"
+                alt=""
+                class="mb-3 h-40 w-full rounded-lg object-cover"
               >
-                Ver en tienda
-              </ULink>
-            </div>
-          </UCard>
-        </div>
+              <div class="flex items-start justify-between gap-2">
+                <p class="font-medium">{{ item.nombre }}</p>
+                <UBadge
+                  v-if="item.prioridad === 'URGENTE'"
+                  color="red"
+                  variant="subtle"
+                  size="xs"
+                >
+                  Urgente
+                </UBadge>
+              </div>
+              <p
+                v-if="item.descripcion"
+                class="mt-1 text-sm text-gray-500 dark:text-gray-400"
+              >
+                {{ item.descripcion }}
+              </p>
+
+              <div class="mt-2 flex flex-wrap items-center gap-2">
+                <UBadge v-if="item.cantidad > 1" color="blue" variant="subtle" size="xs">
+                  Quedan {{ item.disponibles }} de {{ item.cantidad }}
+                </UBadge>
+                <UBadge v-if="item.rango_precio" color="gray" variant="subtle" size="xs">
+                  {{ RANGO_PRECIO_LABEL[item.rango_precio] }}
+                </UBadge>
+              </div>
+
+              <div class="mt-3 flex items-center gap-2">
+                <UButton size="sm" @click="itemReservando = item">
+                  Yo lo regalo
+                </UButton>
+                <ULink
+                  v-if="item.amazon_link"
+                  :to="item.amazon_link"
+                  target="_blank"
+                  class="text-xs text-pink-600 underline dark:text-pink-300"
+                >
+                  Ver en tienda
+                </ULink>
+              </div>
+            </UCard>
+          </div>
+        </section>
       </template>
     </main>
 
@@ -218,6 +276,9 @@ async function deshacer(itemId: number) {
         <form class="space-y-4" @submit.prevent="reservar">
           <p class="text-sm text-gray-600 dark:text-gray-300">
             <span class="font-medium">{{ itemReservando.nombre }}</span>
+            <span v-if="itemReservando.cantidad > 1">
+              — reservás una unidad de {{ itemReservando.cantidad }}
+            </span>
           </p>
           <UFormGroup label="Tu nombre" required>
             <UInput
@@ -227,12 +288,20 @@ async function deshacer(itemId: number) {
               placeholder="¿Cómo te llamás?"
             />
           </UFormGroup>
+          <UFormGroup label="Mensaje (opcional)">
+            <UTextarea
+              v-model="mensajeInvitado"
+              :rows="2"
+              maxlength="500"
+              placeholder="Unas palabras para acompañar el regalo…"
+            />
+          </UFormGroup>
           <UAlert
             color="pink"
             variant="subtle"
             icon="i-heroicons-sparkles"
-            title="Tu nombre queda en secreto"
-            description="No lo verán hasta que marquen el regalo como recibido."
+            title="Tu nombre y tu mensaje quedan en secreto"
+            description="No los verán hasta que marquen el regalo como recibido."
           />
           <div class="flex justify-end gap-2">
             <UButton variant="ghost" color="gray" @click="itemReservando = null">

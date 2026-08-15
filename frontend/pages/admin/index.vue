@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Item } from '~/types/api'
+import type { Item, ItemBusqueda } from '~/types/api'
+import { PRIORIDAD_LABEL, RANGO_PRECIO_LABEL } from '~/types/api'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -11,15 +12,36 @@ const toast = useToast()
 const modalForm = ref(false)
 const itemEditando = ref<Item | null>(null)
 const itemAdquirir = ref<Item | null>(null)
+const itemReservas = ref<Item | null>(null)
 const itemCaja = ref<Item | null>(null)
 const itemEliminar = ref<Item | null>(null)
-const itemLiberar = ref<Item | null>(null)
 const filtro = ref<'TODOS' | 'NECESITADO' | 'RESERVADO' | 'ADQUIRIDO'>('TODOS')
+
+const busqueda = ref('')
+const resultados = ref<ItemBusqueda[] | null>(null)
+const buscando = ref(false)
 
 onMounted(async () => {
   auth.fetchMe()
   await Promise.all([items.fetchAll(), items.fetchPendientes()])
 })
+
+watchDebounced(
+  busqueda,
+  async (q: string) => {
+    if (!q.trim()) {
+      resultados.value = null
+      return
+    }
+    buscando.value = true
+    try {
+      resultados.value = await items.buscar(q.trim())
+    } finally {
+      buscando.value = false
+    }
+  },
+  { debounce: 300 },
+)
 
 const itemsFiltrados = computed(() =>
   filtro.value === 'TODOS'
@@ -42,52 +64,49 @@ function acciones(item: Item) {
       modalForm.value = true
     },
   }
-  const eliminar = {
-    label: 'Eliminar',
-    icon: 'i-heroicons-trash',
-    click: () => (itemEliminar.value = item),
+  const grupos = [[editar]]
+
+  const segundo = []
+  // El panel de reservas aparece siempre que haya unidades reservadas,
+  // aunque al item todavía le queden otras disponibles.
+  if (item.reservas_activas > 0) {
+    segundo.push({
+      label: `Regalos en camino (${item.reservas_activas})`,
+      icon: 'i-heroicons-gift',
+      click: () => (itemReservas.value = item),
+    })
   }
-  if (item.estado === 'NECESITADO') {
-    return [
-      [editar],
-      [
-        {
-          label: 'Marcar adquirido',
-          icon: 'i-heroicons-check-circle',
-          click: () => (itemAdquirir.value = item),
-        },
-      ],
-      [eliminar],
-    ]
+  if (item.estado !== 'ADQUIRIDO' && item.reservas_activas === 0) {
+    segundo.push({
+      label: 'Marcar adquirido',
+      icon: 'i-heroicons-check-circle',
+      click: () => (itemAdquirir.value = item),
+    })
   }
-  if (item.estado === 'RESERVADO') {
-    return [
-      [editar],
-      [
-        {
-          label: 'Regalo recibido',
-          icon: 'i-heroicons-gift',
-          click: () => (itemAdquirir.value = item),
-        },
-        {
-          label: 'Liberar reserva',
-          icon: 'i-heroicons-arrow-uturn-left',
-          click: () => (itemLiberar.value = item),
-        },
-      ],
-    ]
-  }
-  return [
-    [editar],
-    [
+  if (segundo.length > 0) grupos.push(segundo)
+
+  if (item.estado === 'ADQUIRIDO') {
+    grupos.push([
       {
         label: item.caja ? 'Cambiar caja' : 'Asignar caja',
         icon: 'i-heroicons-archive-box',
         click: () => (itemCaja.value = item),
       },
-    ],
-    [eliminar],
-  ]
+    ])
+  }
+
+  // Con unidades reservadas no se puede eliminar: hay que resolverlas.
+  if (item.reservas_activas === 0) {
+    grupos.push([
+      {
+        label: 'Eliminar',
+        icon: 'i-heroicons-trash',
+        click: () => (itemEliminar.value = item),
+      },
+    ])
+  }
+
+  return grupos
 }
 
 async function confirmarEliminar() {
@@ -99,18 +118,6 @@ async function confirmarEliminar() {
     toast.add({ title: 'No se pudo eliminar', color: 'red' })
   } finally {
     itemEliminar.value = null
-  }
-}
-
-async function confirmarLiberar() {
-  if (!itemLiberar.value) return
-  try {
-    await items.liberarReserva(itemLiberar.value.id)
-    toast.add({ title: 'Reserva liberada — el item vuelve a la lista', color: 'green' })
-  } catch {
-    toast.add({ title: 'No se pudo liberar la reserva', color: 'red' })
-  } finally {
-    itemLiberar.value = null
   }
 }
 
@@ -132,10 +139,7 @@ function salir() {
         </UBadge>
       </div>
       <div class="flex items-center gap-2">
-        <UButton
-          icon="i-heroicons-plus"
-          @click="itemEditando = null; modalForm = true"
-        >
+        <UButton icon="i-heroicons-plus" @click="itemEditando = null; modalForm = true">
           Nuevo item
         </UButton>
         <UButton
@@ -155,6 +159,43 @@ function salir() {
       </div>
     </div>
 
+    <UInput
+      v-model="busqueda"
+      icon="i-heroicons-magnifying-glass"
+      placeholder="Buscar algo y ver en qué caja está…"
+      :loading="buscando"
+      aria-label="Buscar items"
+    />
+
+    <UCard v-if="resultados !== null">
+      <template #header>
+        <h3 class="text-sm font-medium">
+          {{ resultados.length }} resultado{{ resultados.length === 1 ? '' : 's' }}
+        </h3>
+      </template>
+      <p v-if="resultados.length === 0" class="text-sm text-gray-500 dark:text-gray-400">
+        No encontramos nada con «{{ busqueda }}».
+      </p>
+      <ul v-else class="divide-y divide-pink-100 dark:divide-neutral-800">
+        <li
+          v-for="r in resultados"
+          :key="r.id"
+          class="flex flex-wrap items-center justify-between gap-2 py-2"
+        >
+          <span class="text-sm font-medium">{{ r.nombre }}</span>
+          <UBadge v-if="r.caja" color="gray" variant="subtle">
+            📦 {{ r.caja.etiqueta }}
+            <span v-if="r.caja.descripcion" class="ml-1 opacity-75">
+              — {{ r.caja.descripcion }}
+            </span>
+          </UBadge>
+          <span v-else class="text-xs text-gray-500 dark:text-gray-400">
+            Sin caja asignada
+          </span>
+        </li>
+      </ul>
+    </UCard>
+
     <div class="flex flex-wrap gap-2">
       <UButton
         v-for="f in (['TODOS', 'NECESITADO', 'RESERVADO', 'ADQUIRIDO'] as const)"
@@ -173,7 +214,7 @@ function salir() {
 
     <UCard v-else-if="itemsFiltrados.length === 0">
       <p class="py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-        No hay items aquí todavía. ¡Agrega el primero con "Nuevo item"!
+        No hay items aquí todavía. ¡Agregá el primero con "Nuevo item"!
       </p>
     </UCard>
 
@@ -210,12 +251,20 @@ function salir() {
           <UBadge :color="badge[item.estado].color" variant="subtle">
             {{ badge[item.estado].label }}
           </UBadge>
-          <UBadge
-            v-if="item.estado === 'ADQUIRIDO' && item.origen_adquisicion === 'REGALO'"
-            color="pink"
-            variant="subtle"
-          >
-            🎁 {{ item.gifter_name || 'Regalo' }}
+          <UBadge v-if="item.cantidad > 1" color="blue" variant="subtle">
+            {{ item.cantidad_recibida }}/{{ item.cantidad }} recibidos
+          </UBadge>
+          <UBadge v-if="item.prioridad === 'URGENTE'" color="red" variant="subtle">
+            {{ PRIORIDAD_LABEL.URGENTE }}
+          </UBadge>
+          <UBadge v-if="item.rango_precio" color="gray" variant="subtle">
+            {{ RANGO_PRECIO_LABEL[item.rango_precio] }}
+          </UBadge>
+          <UBadge v-if="item.categoria" color="gray" variant="subtle">
+            {{ item.categoria.nombre }}
+          </UBadge>
+          <UBadge v-if="item.gifter_name" color="pink" variant="subtle">
+            🎁 {{ item.gifter_name }}
           </UBadge>
           <UBadge v-if="item.caja" color="gray" variant="subtle">
             📦 {{ item.caja.etiqueta }}
@@ -232,21 +281,18 @@ function salir() {
       </UCard>
     </div>
 
-    <ItemFormModal
-      v-if="modalForm"
-      :item="itemEditando"
-      @close="modalForm = false"
-    />
+    <ItemFormModal v-if="modalForm" :item="itemEditando" @close="modalForm = false" />
     <AdquirirModal
       v-if="itemAdquirir"
       :item="itemAdquirir"
       @close="itemAdquirir = null"
     />
-    <CajaModal
-      v-if="itemCaja"
-      :item="itemCaja"
-      @close="itemCaja = null"
+    <ReservasModal
+      v-if="itemReservas"
+      :item="itemReservas"
+      @close="itemReservas = null"
     />
+    <CajaModal v-if="itemCaja" :item="itemCaja" @close="itemCaja = null" />
     <ConfirmModal
       v-if="itemEliminar"
       titulo="Eliminar item"
@@ -254,15 +300,6 @@ function salir() {
       confirm-label="Eliminar"
       @close="itemEliminar = null"
       @confirm="confirmarEliminar"
-    />
-    <ConfirmModal
-      v-if="itemLiberar"
-      titulo="Liberar reserva"
-      :descripcion="`«${itemLiberar.nombre}» volverá a estar disponible en la wishlist. La persona que lo reservó NO será notificada y su nombre seguirá oculto — la sorpresa se mantiene.`"
-      confirm-label="Liberar"
-      color="pink"
-      @close="itemLiberar = null"
-      @confirm="confirmarLiberar"
     />
   </div>
 </template>
