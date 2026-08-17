@@ -109,7 +109,9 @@ async function liberar(reserva: ReservaAdmin) {
             class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-pink-200 p-3 dark:border-neutral-800"
           >
             <div class="flex items-center gap-2">
-              <span class="text-sm">🎁 Unidad {{ reserva.unidad }}</span>
+              <span class="text-sm">
+                🎁 {{ reservas.length > 1 ? `Unidad ${reserva.unidad}` : 'Un regalo' }}
+              </span>
               <UBadge
                 :color="reserva.dias_desde_reserva > DIAS_VIEJA ? 'amber' : 'gray'"
                 variant="subtle"
@@ -125,7 +127,7 @@ async function liberar(reserva: ReservaAdmin) {
                 :loading="trabajando === reserva.id"
                 @click="recibir(reserva)"
               >
-                Recibido
+                Ya llegó
               </UButton>
               <UButton
                 size="xs"

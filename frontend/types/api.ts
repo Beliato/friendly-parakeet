@@ -113,6 +113,17 @@ export interface ItemPublico {
   fotos: FotoItem[]
 }
 
+/** Algo que está por llegar. Lleva el nombre del objeto para poder
+ *  identificarlo, nunca el de quien lo reservó. */
+export interface ReservaPendiente {
+  id: number
+  item_id: number
+  item_nombre: string
+  unidad: number
+  total_unidades: number
+  dias_desde_reserva: number
+}
+
 /** Una entrada del muro de agradecimiento de la página pública. */
 export interface RegaloPublico {
   id: number

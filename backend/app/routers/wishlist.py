@@ -18,6 +18,7 @@ from app.schemas.wishlist import (
     ConfigUpdate,
     ItemPublicoOut,
     RegaloPublicoOut,
+    ReservaPendienteOut,
     ReservarRequest,
     ReservarResponse,
     ReservasCountOut,
@@ -93,6 +94,37 @@ def contar_reservas_pendientes(
 ):
     pendientes = db.query(Reserva).filter(Reserva.released_at.is_(None)).count()
     return ReservasCountOut(pendientes=pendientes)
+
+
+@router.get("/reservas/pendientes", response_model=list[ReservaPendienteOut])
+def listar_reservas_pendientes(
+    db: Session = Depends(get_db),
+    _: Admin = Depends(get_current_admin),
+):
+    """Todo lo que está en camino, de todos los items, en un solo lugar.
+
+    Incluye el nombre del objeto para poder encontrarlo cuando llega, pero
+    nunca el de quien lo reservó: eso se revela recién al recibirlo.
+    """
+    ahora = datetime.now(UTC)
+    reservas = (
+        db.query(Reserva)
+        .options(selectinload(Reserva.item))
+        .filter(Reserva.released_at.is_(None))
+        .order_by(Reserva.created_at)
+        .all()
+    )
+    return [
+        ReservaPendienteOut(
+            id=r.id,
+            item_id=r.item_id,
+            item_nombre=r.item.nombre,
+            unidad=r.unidad,
+            total_unidades=r.item.cantidad,
+            dias_desde_reserva=(ahora - r.created_at).days,
+        )
+        for r in reservas
+    ]
 
 
 # --- Wishlist pública ---

@@ -6,6 +6,7 @@ import type {
   Prioridad,
   RangoPrecio,
   ReservaAdmin,
+  ReservaPendiente,
   ReservaRevelada,
 } from '~/types/api'
 
@@ -22,6 +23,7 @@ interface ItemPayload {
 export const useItemsStore = defineStore('items', {
   state: () => ({
     items: [] as Item[],
+    enCamino: [] as ReservaPendiente[],
     pendientes: 0,
     cargando: false,
   }),
@@ -45,6 +47,12 @@ export const useItemsStore = defineStore('items', {
         '/reservas/pendientes/count',
       )
       this.pendientes = data.pendientes
+    },
+    async fetchEnCamino() {
+      const api = useApi()
+      this.enCamino = await api<ReservaPendiente[]>('/reservas/pendientes')
+      this.pendientes = this.enCamino.length
+      return this.enCamino
     },
     async crear(body: ItemPayload & { nombre: string }) {
       const api = useApi()
@@ -80,6 +88,15 @@ export const useItemsStore = defineStore('items', {
     async fetchReservas(itemId: number) {
       const api = useApi()
       return await api<ReservaAdmin[]>(`/items/${itemId}/reservas`)
+    },
+    /** Marca que llegó, cuando hay una sola reserva y no hay nada que
+     *  elegir: el caso normal. Devuelve la revelación para el cartelito. */
+    async recibirLaUnica(itemId: number) {
+      const reservas = await this.fetchReservas(itemId)
+      if (reservas.length !== 1) {
+        throw new Error('El item no tiene exactamente una reserva activa')
+      }
+      return await this.recibirUnidad(itemId, reservas[0]!.id)
     },
     async recibirUnidad(itemId: number, reservaId: number) {
       const api = useApi()

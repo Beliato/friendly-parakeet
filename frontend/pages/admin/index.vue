@@ -75,24 +75,17 @@ function acciones(item: Item) {
   }
   const grupos = [[editar]]
 
-  const segundo = []
-  // El panel de reservas aparece siempre que haya unidades reservadas,
-  // aunque al item todavía le queden otras disponibles.
-  if (item.reservas_activas > 0) {
-    segundo.push({
-      label: `Regalos en camino (${item.reservas_activas})`,
-      icon: 'i-heroicons-gift',
-      click: () => (itemReservas.value = item),
-    })
-  }
+  // "Ya llegó" no vive acá: es la acción principal y va como botón
+  // visible en la tarjeta.
   if (item.estado !== 'ADQUIRIDO' && item.reservas_activas === 0) {
-    segundo.push({
-      label: 'Marcar adquirido',
-      icon: 'i-heroicons-check-circle',
-      click: () => (itemAdquirir.value = item),
-    })
+    grupos.push([
+      {
+        label: 'Marcar adquirido',
+        icon: 'i-heroicons-check-circle',
+        click: () => (itemAdquirir.value = item),
+      },
+    ])
   }
-  if (segundo.length > 0) grupos.push(segundo)
 
   if (item.estado === 'ADQUIRIDO') {
     grupos.push([
@@ -116,6 +109,33 @@ function acciones(item: Item) {
   }
 
   return grupos
+}
+
+const recibiendo = ref<number | null>(null)
+
+/** Con una sola reserva no hay nada que elegir, así que se marca de una.
+ *  Con varias se abre el panel para decidir cuál. */
+async function yaLlego(item: Item) {
+  if (item.reservas_activas > 1) {
+    itemReservas.value = item
+    return
+  }
+  recibiendo.value = item.id
+  try {
+    const revelada = await items.recibirLaUnica(item.id)
+    toast.add({
+      title: '¡Sorpresa revelada! 🎁',
+      description: revelada.mensaje
+        ? `De ${revelada.nombre}: «${revelada.mensaje}»`
+        : `Este regalo era de: ${revelada.nombre}`,
+      color: 'pink',
+      timeout: 10000,
+    })
+  } catch {
+    toast.add({ title: 'No se pudo marcar como recibido', color: 'red' })
+  } finally {
+    recibiendo.value = null
+  }
 }
 
 async function confirmarEliminar() {
@@ -289,6 +309,16 @@ function salir() {
           alt=""
           class="mt-2 h-32 w-full rounded-lg object-cover"
         >
+
+        <UButton
+          v-if="item.reservas_activas > 0"
+          class="mt-3 w-full justify-center"
+          icon="i-heroicons-gift"
+          :loading="recibiendo === item.id"
+          @click="yaLlego(item)"
+        >
+          Ya llegó{{ item.reservas_activas > 1 ? ` (${item.reservas_activas})` : '' }}
+        </UButton>
 
         <div class="mt-3 flex flex-wrap items-center gap-2">
           <UBadge :color="badge[item.estado].color" variant="subtle">

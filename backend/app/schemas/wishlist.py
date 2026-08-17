@@ -63,3 +63,18 @@ class ReservarResponse(BaseModel):
 
 class ReservasCountOut(BaseModel):
     pendientes: int
+
+
+class ReservaPendienteOut(BaseModel):
+    """Una reserva en camino, vista por el admin.
+
+    Lleva el nombre del objeto para poder identificarlo cuando llega, pero
+    nunca el de quien reservó: eso es la sorpresa.
+    """
+
+    id: int
+    item_id: int
+    item_nombre: str
+    unidad: int
+    total_unidades: int
+    dias_desde_reserva: int
