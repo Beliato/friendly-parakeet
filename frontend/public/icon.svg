@@ -1,27 +1,30 @@
 <svg width="200" height="200" viewBox="0 0 200 200" role="img" xmlns="http://www.w3.org/2000/svg">
-<title>Icono de la app Julia en Camino</title>
-<desc>Insignia circular con degrade rosa y una J trazada a mano, con una pequeña estrella; variante oscura para modo noche.</desc>
-<defs>
-<linearGradient id="bgLight" x1="0%" y1="0%" x2="100%" y2="100%">
-<stop offset="0%" stop-color="#fdcae1"/>
-<stop offset="100%" stop-color="#c594aa"/>
-</linearGradient>
-<linearGradient id="bgDark" x1="0%" y1="0%" x2="100%" y2="100%">
-<stop offset="0%" stop-color="#131313"/>
-<stop offset="100%" stop-color="#050505"/>
-</linearGradient>
+<title>Julia en Camino</title>
+<desc>Insignia circular color crema con una J trazada a mano en rosa vino y una pequeña flor de cinco pétalos; variante oscura para modo noche.</desc>
 <style>
-.bg{fill:url(#bgLight);}
-.letter{stroke:#ffffff;fill:none;stroke-width:16;stroke-linecap:round;stroke-linejoin:round;}
-.star{fill:#ffffff;}
+.fondo{fill:#fdf9f0;}
+.aro{fill:none;stroke:#d7c1c1;stroke-width:2;}
+.letra{stroke:#8c4c4d;fill:none;stroke-width:13;stroke-linecap:round;stroke-linejoin:round;}
+.petalo{fill:#c98d8e;}
+.centro{fill:#e0b07a;}
 @media (prefers-color-scheme: dark){
-.bg{fill:url(#bgDark);}
-.letter{stroke:#fdcae1;}
-.star{fill:#fdcae1;}
+.fondo{fill:#1c1c17;}
+.aro{stroke:#534343;}
+.letra{stroke:#ecd2d1;}
+.petalo{fill:#dfb3b3;}
 }
 </style>
-</defs>
-<circle class="bg" cx="100" cy="100" r="94"/>
-<path class="letter" d="M114,58 L114,122 Q114,150 86,150 Q72,150 62,140"/>
-<path class="star" d="M64,52 L67,60 L75,63 L67,66 L64,74 L61,66 L53,63 L61,60 Z"/>
+<circle class="fondo" cx="100" cy="100" r="96"/>
+<circle class="aro" cx="100" cy="100" r="88"/>
+<path class="letra" d="M104,66 L104,120 Q104,148 78,148 Q62,148 54,135"/>
+<g transform="translate(133,68)">
+<g class="petalo">
+<ellipse cx="0" cy="-9" rx="5.4" ry="7"/>
+<ellipse cx="0" cy="-9" rx="5.4" ry="7" transform="rotate(72)"/>
+<ellipse cx="0" cy="-9" rx="5.4" ry="7" transform="rotate(144)"/>
+<ellipse cx="0" cy="-9" rx="5.4" ry="7" transform="rotate(216)"/>
+<ellipse cx="0" cy="-9" rx="5.4" ry="7" transform="rotate(288)"/>
+</g>
+<circle class="centro" r="3.4"/>
+</g>
 </svg>
